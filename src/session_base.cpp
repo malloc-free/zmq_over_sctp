@@ -33,6 +33,8 @@
 #include "ctx.hpp"
 #include "req.hpp"
 
+#include "transport.h"
+
 zmq::session_base_t *zmq::session_base_t::create (class io_thread_t *io_thread_,
     bool active_, class socket_base_t *socket_, const options_t &options_,
     address_t *addr_)
@@ -484,7 +486,7 @@ void zmq::session_base_t::start_connecting (bool wait_)
 
     if (addr->protocol == "tcp") {
         tcp_connecter_t *connecter = new (std::nothrow) tcp_connecter_t (
-            io_thread, this, options, addr, wait_);
+            io_thread, this, options, addr, wait_, get_ctx()->get_transport());
         alloc_assert (connecter);
         launch_child (connecter);
         return;

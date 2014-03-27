@@ -32,6 +32,8 @@
 #include "tcp_address.hpp"
 #include "session_base.hpp"
 
+#include "transport.h"
+
 #if defined ZMQ_HAVE_WINDOWS
 #include "windows.hpp"
 #else
@@ -50,7 +52,7 @@
 
 zmq::tcp_connecter_t::tcp_connecter_t (class io_thread_t *io_thread_,
       class session_base_t *session_, const options_t &options_,
-      address_t *addr_, bool delayed_start_) :
+      address_t *addr_, bool delayed_start_, Transport *transport_) :
     own_t (io_thread_, options_),
     io_object_t (io_thread_),
     addr (addr_),
@@ -59,7 +61,8 @@ zmq::tcp_connecter_t::tcp_connecter_t (class io_thread_t *io_thread_,
     delayed_start (delayed_start_),
     timer_started (false),
     session (session_),
-    current_reconnect_ivl(options.reconnect_ivl)
+    current_reconnect_ivl(options.reconnect_ivl),
+    transport(transport_)
 {
     zmq_assert (addr);
     zmq_assert (addr->protocol == "tcp");
@@ -129,7 +132,7 @@ void zmq::tcp_connecter_t::out_event ()
 
     //  Create the engine object for this connection.
     stream_engine_t *engine = new (std::nothrow)
-        stream_engine_t (fd, options, endpoint);
+        stream_engine_t (fd, options, endpoint, transport);
     alloc_assert (engine);
 
     //  Attach the engine to the corresponding session object.
@@ -262,9 +265,14 @@ int zmq::tcp_connecter_t::open ()
         set_ip_type_of_service (s, options.tos);
 
     //  Connect to the remote peer.
-    rc = ::connect (
-        s, addr->resolved.tcp_addr->addr (),
-        addr->resolved.tcp_addr->addrlen ());
+//    rc = ::connect (
+//        s, addr->resolved.tcp_addr->addr (),
+//        addr->resolved.tcp_addr->addrlen ());
+
+    //Connect using transport (pluggable txprt).
+    rc = transport->tx_connect (
+            s, addr->resolved.tcp_addr->addr (),
+            addr->resolved.tcp_addr->addrlen ());
 
     //  Connect was successfull immediately.
     if (rc == 0)
@@ -295,7 +303,8 @@ zmq::fd_t zmq::tcp_connecter_t::connect ()
     socklen_t len = sizeof (err);
 #endif
 
-    int rc = getsockopt (s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
+    //int rc = getsockopt (s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
+    int rc = transport->tx_getsockopt(s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
 
     //  Assert if the error was caused by 0MQ bug.
     //  Networking problems are OK. No need to assert.
@@ -346,7 +355,9 @@ void zmq::tcp_connecter_t::close ()
     int rc = closesocket (s);
     wsa_assert (rc != SOCKET_ERROR);
 #else
-    int rc = ::close (s);
+    //int rc = ::close (s);
+    // Close socket (pluggable txprt)
+    int rc = transport->tx_close(s);
     errno_assert (rc == 0);
 #endif
     socket->event_closed (endpoint, s);

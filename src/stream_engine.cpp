@@ -53,8 +53,11 @@
 #include "likely.hpp"
 #include "wire.hpp"
 
+#include "transport.h"
+
 zmq::stream_engine_t::stream_engine_t (fd_t fd_, const options_t &options_, 
-                                       const std::string &endpoint_) :
+                                       const std::string &endpoint_,
+                                       Transport *transport_) :
     s (fd_),
     inpos (NULL),
     insize (0),
@@ -76,7 +79,8 @@ zmq::stream_engine_t::stream_engine_t (fd_t fd_, const options_t &options_,
     mechanism (NULL),
     input_stopped (false),
     output_stopped (false),
-    socket (NULL)
+    socket (NULL),
+    transport (transport_)
 {
     int rc = tx_msg.init ();
     errno_assert (rc == 0);
@@ -810,6 +814,8 @@ int zmq::stream_engine_t::write (const void *data_, size_t size_)
 
     int nbytes = send (s, (char*) data_, (int) size_, 0);
 
+
+
     //  If not a single byte can be written to the socket in non-blocking mode
     //  we'll get an error (this may happen during the speculative write).
     if (nbytes == SOCKET_ERROR && WSAGetLastError () == WSAEWOULDBLOCK)
@@ -830,7 +836,10 @@ int zmq::stream_engine_t::write (const void *data_, size_t size_)
 
 #else
 
-    ssize_t nbytes = send (s, data_, size_, 0);
+    //ssize_t nbytes = send (s, data_, size_, 0);
+    //Send bytes (pluggable txprt).
+    ssize_t nbytes = transport->tx_send (s, (char*) data_,
+    			(int) size_, 0);
 
     //  Several errors are OK. When speculative write is being done we may not
     //  be able to write a single byte from the socket. Also, SIGSTOP issued
@@ -886,7 +895,8 @@ int zmq::stream_engine_t::read (void *data_, size_t size_)
 
 #else
 
-    const ssize_t rc = recv (s, data_, size_, 0);
+    //const ssize_t rc = recv (s, data_, size_, 0);
+    const ssize_t rc = transport->tx_recv(s, data_, size_, 0);
 
     //  Several errors are OK. When speculative read is being done we may not
     //  be able to read a single byte from the socket. Also, SIGSTOP issued

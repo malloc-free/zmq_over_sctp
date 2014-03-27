@@ -71,6 +71,8 @@
 #include "xsub.hpp"
 #include "stream.hpp"
 
+#include "transport.h"
+
 bool zmq::socket_base_t::check_tag ()
 {
     return tag == 0xbaddecaf;
@@ -385,7 +387,7 @@ int zmq::socket_base_t::bind (const char *addr_)
 
     if (protocol == "tcp") {
         tcp_listener_t *listener = new (std::nothrow) tcp_listener_t (
-            io_thread, this, options);
+            io_thread, this, options, get_ctx()->get_transport());
         alloc_assert (listener);
         int rc = listener->set_address (address.c_str ());
         if (rc != 0) {
