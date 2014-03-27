@@ -1,0 +1,51 @@
+/*
+ * tcpWrapper.h
+ *
+ *  Created on: 19/03/2014
+ *      Author: michael
+ */
+
+#ifndef TCPWRAPPER_H_
+#define TCPWRAPPER_H_
+
+#include "transport.h"
+#include <sys/socket.h>
+
+namespace zmq {
+
+class Tcp_Wrapper : public Transport
+{
+
+public:
+	Tcp_Wrapper();
+
+	virtual ~Tcp_Wrapper();
+
+	int tx_socket(int domain, int type, int protocol);
+
+	int tx_connect(int sockfd, const struct sockaddr *addr,
+			socklen_t addrlen);
+
+	int tx_listen(int sockfd, int backlog);
+
+	int tx_bind(int sockfd, const struct sockaddr *addr,
+			socklen_t addrlen);
+
+	int tx_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+	int tx_send(int sockfd, const void *buf, size_t len, int flags);
+
+	int tx_recv(int sockfd, void *buf, size_t len, int flags);
+
+	int tx_close(int fd);
+
+	int tx_getsockopt(int sockfd, int level, int optname,
+			void *optval, socklen_t *optlen);
+
+	int tx_setsockopt(int sockfd, int level, int optname,
+			const void *optval, socklen_t optlen);
+};
+
+} /* namespace zmq */
+
+#endif /* TCPWRAPPER_H_ */
