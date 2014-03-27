@@ -44,6 +44,15 @@ public:
 
 	int tx_setsockopt(int sockfd, int level, int optname,
 			const void *optval, socklen_t optlen);
+
+	void tx_set_receive_buffer(int sockfd, int bufsize);
+
+	void tx_set_send_buffer(int sockfd, int bufsize);
+
+	void tx_set_keepalives(int sockfd, int keepalive, int keepalive_cnt,
+			int keepalive_idle, int keepalive_intv);
+
+	void tx_tune_socket(int sockfd);
 };
 
 } /* namespace zmq */

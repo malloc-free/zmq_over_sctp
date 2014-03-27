@@ -92,8 +92,14 @@ void zmq::tcp_listener_t::in_event ()
         return;
     }
 
-    tune_tcp_socket (fd);
-    tune_tcp_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
+    //tune_tcp_socket (fd);
+    //tune_tcp_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
+
+    transport->tx_tune_socket(fd);
+    transport->tx_set_keepalives(fd, options.tcp_keepalive,
+    		options.tcp_keepalive_cnt,
+    		options.tcp_keepalive_idle,
+    		options.tcp_keepalive_intvl);
 
     // remember our fd for ZMQ_SRCFD in messages
     socket->set_fd(fd);
@@ -203,10 +209,18 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         set_ip_type_of_service (s, options.tos);
 
     //  Set the socket buffer limits for the underlying socket.
+#ifdef ZMQ_HAVE_WINDOWS
     if (options.sndbuf != 0)
         set_tcp_send_buffer (s, options.sndbuf);
     if (options.rcvbuf != 0)
         set_tcp_receive_buffer (s, options.rcvbuf);
+
+#else
+    if(options.sndbuf != 0)
+    	transport->tx_set_send_buffer(s, options.sndbuf);
+    if(options.rcvbuf != 0)
+    	transport->tx_set_receive_buffer(s, options.rcvbuf);
+#endif
 
     //  Allow reusing of the address.
     int flag = 1;
@@ -215,7 +229,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         (const char*) &flag, sizeof (int));
     wsa_assert (rc != SOCKET_ERROR);
 #else
-    rc = setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (int));
+    rc = transport->tx_setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (int));
     errno_assert (rc == 0);
 #endif
 

@@ -6,10 +6,14 @@
  */
 
 #include "tcpWrapper.h"
+#include "err.hpp"
 
+#include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <iostream>
 
 namespace zmq {
@@ -86,6 +90,72 @@ int Tcp_Wrapper::tx_setsockopt(int sockfd, int level, int optname,
 {
 	//std::cout << "Using wrapper setsockopt" << std::endl;
 	return setsockopt(sockfd, level, optname, optval, optlen);
+}
+
+void Tcp_Wrapper::tx_set_receive_buffer(int sockfd, int bufsize)
+{
+
+	const int rc = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+			(char*)&bufsize, sizeof bufsize);
+
+	errno_assert(rc == 0);
+}
+
+void Tcp_Wrapper::tx_set_send_buffer(int sockfd, int bufsize)
+{
+	const int rc = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+			(char*)&bufsize, sizeof bufsize);
+
+	errno_assert(rc == 0);
+}
+
+void Tcp_Wrapper::tx_set_keepalives(int sockfd, int keepalive, int keepalive_cnt,
+		int keepalive_idle, int keepalive_intvl)
+{
+#ifdef ZMQ_HAVE_SO_KEEPALIVE
+	if (keepalive != -1) {
+		int rc = setsockopt (sockfd, SOL_SOCKET, SO_KEEPALIVE, (char*) &keepalive, sizeof (int));
+		errno_assert (rc == 0);
+
+#ifdef ZMQ_HAVE_TCP_KEEPCNT
+	if (keepalive_cnt != -1) {
+		int rc = setsockopt (sockfd, IPPROTO_TCP, TCP_KEEPCNT, &keepalive_cnt, sizeof (int));
+		errno_assert (rc == 0);
+	}
+#endif // ZMQ_HAVE_TCP_KEEPCNT
+
+#ifdef ZMQ_HAVE_TCP_KEEPIDLE
+	if (keepalive_idle != -1) {
+		int rc = setsockopt (sockfd, IPPROTO_TCP, TCP_KEEPIDLE, &keepalive_idle, sizeof (int));
+		errno_assert (rc == 0);
+	}
+#else // ZMQ_HAVE_TCP_KEEPIDLE
+#ifdef ZMQ_HAVE_TCP_KEEPALIVE
+	if (keepalive_idle_ != -1) {
+		int rc = setsockopt (s_, IPPROTO_TCP, TCP_KEEPALIVE, &keepalive_idle_, sizeof (int));
+		errno_assert (rc == 0);
+	}
+#endif // ZMQ_HAVE_TCP_KEEPALIVE
+#endif // ZMQ_HAVE_TCP_KEEPIDLE
+
+#ifdef ZMQ_HAVE_TCP_KEEPINTVL
+	if (keepalive_intvl != -1) {
+		int rc = setsockopt (sockfd, IPPROTO_TCP, TCP_KEEPINTVL, &keepalive_intvl, sizeof (int));
+		errno_assert (rc == 0);
+	}
+#endif // ZMQ_HAVE_TCP_KEEPINTVL
+	}
+#endif // ZMQ_HAVE_SO_KEEPALIVE
+}
+
+void Tcp_Wrapper::tx_tune_socket(int sockfd)
+{
+	int nodelay = 1;
+
+	int rc = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay,
+			sizeof(int));
+
+	errno_assert(rc == 0);
 }
 
 } /* namespace zmq */
