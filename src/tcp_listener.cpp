@@ -33,6 +33,8 @@
 #include "tcp.hpp"
 #include "socket_base.hpp"
 
+#include "transport.h"
+
 #ifdef ZMQ_HAVE_WINDOWS
 #include "windows.hpp"
 #else
@@ -50,11 +52,13 @@
 #endif
 
 zmq::tcp_listener_t::tcp_listener_t (io_thread_t *io_thread_,
-      socket_base_t *socket_, const options_t &options_) :
+      socket_base_t *socket_, const options_t &options_,
+      Transport *transport_) :
     own_t (io_thread_, options_),
     io_object_t (io_thread_),
     s (retired_fd),
-    socket (socket_)
+    socket (socket_),
+    transport(transport_)
 {
 }
 
@@ -96,7 +100,7 @@ void zmq::tcp_listener_t::in_event ()
 
     //  Create the engine object for this connection.
     stream_engine_t *engine = new (std::nothrow)
-        stream_engine_t (fd, options, endpoint);
+        stream_engine_t (fd, options, endpoint, transport);
     alloc_assert (engine);
 
     //  Choose I/O thread to run connecter in. Given that we are already
@@ -121,7 +125,9 @@ void zmq::tcp_listener_t::close ()
     int rc = closesocket (s);
     wsa_assert (rc != SOCKET_ERROR);
 #else
-    int rc = ::close (s);
+    //int rc = ::close (s);
+    // Close socket (pluggable txprt).
+    int rc = transport->tx_close(s);
     errno_assert (rc == 0);
 #endif
     socket->event_closed (endpoint, s);
@@ -216,8 +222,12 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
     address.to_string (endpoint);
 
     //  Bind the socket to the network interface and port.
-    rc = bind (s, address.addr (), address.addrlen ());
-#ifdef ZMQ_HAVE_WINDOWS
+    // rc = bind (s, address.addr (), address.addrlen ());
+
+    // Bind using transport (pluggable txprt).
+    rc = transport->tx_bind(s, address.addr(), address.addrlen());
+
+    #ifdef ZMQ_HAVE_WINDOWS
     if (rc == SOCKET_ERROR) {
         errno = wsa_error_to_errno (WSAGetLastError ());
         goto error;
@@ -228,7 +238,9 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
 #endif
 
     //  Listen for incomming connections.
-    rc = listen (s, options.backlog);
+    // rc = listen (s, options.backlog);
+    rc = transport->tx_listen(s, options.backlog);
+
 #ifdef ZMQ_HAVE_WINDOWS
     if (rc == SOCKET_ERROR) {
         errno = wsa_error_to_errno (WSAGetLastError ());
@@ -263,7 +275,8 @@ zmq::fd_t zmq::tcp_listener_t::accept ()
 #else
     socklen_t ss_len = sizeof (ss);
 #endif
-    fd_t sock = ::accept (s, (struct sockaddr *) &ss, &ss_len);
+    //fd_t sock = ::accept (s, (struct sockaddr *) &ss, &ss_len);
+    fd_t sock = transport->tx_accept(s, (struct sockaddr *) &ss, &ss_len);
 
 #ifdef ZMQ_HAVE_WINDOWS
     if (sock == INVALID_SOCKET) {
@@ -301,7 +314,9 @@ zmq::fd_t zmq::tcp_listener_t::accept ()
             int rc = closesocket (sock);
             wsa_assert (rc != SOCKET_ERROR);
 #else
-            int rc = ::close (sock);
+            //int rc = ::close (sock);
+            //Pluggable Transport
+            int rc = transport->tx_close(sock);
             errno_assert (rc == 0);
 #endif
             return retired_fd;

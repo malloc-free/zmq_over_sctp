@@ -77,10 +77,12 @@ libzmq_la_SOURCES = \
     stream_engine.hpp \
     sub.hpp \
     tcp.hpp \
+    tcpWrapper.h \
     tcp_address.hpp \
     tcp_connecter.hpp \
     tcp_listener.hpp \
     thread.hpp \
+    transport.h \
     trie.hpp \
     windows.hpp \
     wire.hpp \
@@ -142,6 +144,7 @@ libzmq_la_SOURCES = \
     stream_engine.cpp \
     sub.cpp \
     tcp.cpp \
+    tcpWrapper.cpp \
     tcp_address.cpp \
     tcp_connecter.cpp \
     tcp_listener.cpp \

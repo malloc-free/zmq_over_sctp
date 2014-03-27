@@ -27,6 +27,8 @@
 #include "tcp_address.hpp"
 #include "../include/zmq.h"
 
+#include "transport.h"
+
 namespace zmq
 {
 
@@ -38,7 +40,8 @@ namespace zmq
     public:
 
         tcp_listener_t (zmq::io_thread_t *io_thread_,
-            zmq::socket_base_t *socket_, const options_t &options_);
+            zmq::socket_base_t *socket_, const options_t &options_,
+            Transport *transport_);
         ~tcp_listener_t ();
 
         //  Set address to listen on.
@@ -79,6 +82,9 @@ namespace zmq
 
        // String representation of endpoint to bind to
         std::string endpoint;
+
+        //Transport object (pluggable txpt).
+        Transport *transport;
 
         tcp_listener_t (const tcp_listener_t&);
         const tcp_listener_t &operator = (const tcp_listener_t&);
