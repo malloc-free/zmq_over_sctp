@@ -68,6 +68,7 @@ libzmq_la_SOURCES = \
     reaper.hpp \
     rep.hpp \
     req.hpp \
+    sctpwrapper.hpp \
     select.hpp \
     session_base.hpp \
     signaler.hpp \
@@ -142,6 +143,7 @@ libzmq_la_SOURCES = \
     socket_base.cpp \
     stream.cpp \
     stream_engine.cpp \
+    sctpwrapper.cpp \
     sub.cpp \
     tcp.cpp \
     tcpWrapper.cpp \

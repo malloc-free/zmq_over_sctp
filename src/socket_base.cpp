@@ -54,6 +54,7 @@
 #include "ipc_address.hpp"
 #include "tcp_address.hpp"
 #include "tipc_address.hpp"
+
 #ifdef ZMQ_HAVE_OPENPGM
 #include "pgm_socket.hpp"
 #endif
@@ -72,6 +73,8 @@
 #include "stream.hpp"
 
 #include "transport.h"
+#include "tcpWrapper.h"
+#include "sctpwrapper.h"
 
 bool zmq::socket_base_t::check_tag ()
 {
@@ -193,7 +196,7 @@ int zmq::socket_base_t::check_protocol (const std::string &protocol_)
     //  First check out whether the protcol is something we are aware of.
     if (protocol_ != "inproc" && protocol_ != "ipc" && protocol_ != "tcp" &&
           protocol_ != "pgm" && protocol_ != "epgm" && protocol_ != "tipc" &&
-          protocol_ != "norm") {
+          protocol_ != "norm" && protocol_ != "sctp") {
         errno = EPROTONOSUPPORT;
         return -1;
     }
@@ -385,9 +388,19 @@ int zmq::socket_base_t::bind (const char *addr_)
         return -1;
     }
 
-    if (protocol == "tcp") {
+    if (protocol == "tcp" || protocol == "sctp") {
+
+    	zmq::Transport *txpt;
+
+    	if(protocol == "tcp"){
+    		txpt = new (std::nothrow) Tcp_Wrapper();
+    	}
+    	else{
+    		txpt = new (std::nothrow) sctp_wrapper();
+    	}
+
         tcp_listener_t *listener = new (std::nothrow) tcp_listener_t (
-            io_thread, this, options, get_ctx()->get_transport());
+            io_thread, this, options, txpt);
         alloc_assert (listener);
         int rc = listener->set_address (address.c_str ());
         if (rc != 0) {
