@@ -34,6 +34,8 @@
 #include "req.hpp"
 
 #include "transport.h"
+#include "tcpWrapper.h"
+#include "sctpwrapper.h"
 
 zmq::session_base_t *zmq::session_base_t::create (class io_thread_t *io_thread_,
     bool active_, class socket_base_t *socket_, const options_t &options_,
@@ -484,9 +486,19 @@ void zmq::session_base_t::start_connecting (bool wait_)
 
     //  Create the connecter object.
 
-    if (addr->protocol == "tcp") {
+    if (addr->protocol == "tcp" || addr->protocol == "sctp") {
+
+    	Transport *txpt;
+
+    	if(addr->protocol == "tcp"){
+    		txpt = new (std::nothrow) Tcp_Wrapper();
+    	}
+    	else{
+    		txpt = new (std::nothrow) sctp_wrapper();
+    	}
+
         tcp_connecter_t *connecter = new (std::nothrow) tcp_connecter_t (
-            io_thread, this, options, addr, wait_, get_ctx()->get_transport());
+            io_thread, this, options, addr, wait_, txpt);
         alloc_assert (connecter);
         launch_child (connecter);
         return;
