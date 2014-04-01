@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <string>
 
 namespace zmq {
 
@@ -31,7 +32,7 @@ public:
 
 	virtual int tx_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) = 0;
 
-	virtual int tx_send(int sockfd, const void *buf, size_t len, int flags) = 0 ;
+	virtual int tx_send(int sockfd, const void *buf, size_t len, int flags) = 0;
 
 	virtual int tx_recv(int sockfd, void *buf, size_t len, int flags) = 0;
 
@@ -51,6 +52,14 @@ public:
 			int keepalive_cnt, int keepalive_idle, int keepalive_intv) = 0;
 
 	virtual void tx_tune_socket(int sockfd) = 0;
+
+	virtual void tx_unblock_socket(int sockfd) = 0;
+
+	virtual void tx_enable_ipv4_mapping(int sockfd) = 0;
+
+	virtual void tx_get_peer_ip_address(int sockfd, std::string &ip_addr_) = 0;
+
+	virtual void tx_set_ip_type_of_service(int sockfd, int iptos) = 0;
 };
 
 } /* namespace zmq */

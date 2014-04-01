@@ -8,6 +8,7 @@ noinst_PROGRAMS = test_system \
                   test_pair_tcp \
                   test_reqrep_inproc \
                   test_reqrep_tcp \
+                  test_reqrep_sctp \
                   test_hwm \
                   test_reqrep_device \
                   test_sub_forward \
@@ -24,6 +25,7 @@ noinst_PROGRAMS = test_system \
                   test_router_handover \
                   test_probe_router \
                   test_stream \
+	          test_stream_sctp \
                   test_stream_empty \
                   test_stream_disconnect \
                   test_disconnect_inproc \

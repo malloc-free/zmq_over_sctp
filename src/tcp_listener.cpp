@@ -168,7 +168,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         return -1;
 
     //  Create a listening socket.
-    s = open_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
+    s = transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
 #ifdef ZMQ_HAVE_WINDOWS
     if (s == INVALID_SOCKET)
         errno = wsa_error_to_errno (WSAGetLastError ());
@@ -181,7 +181,8 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         rc = address.resolve (addr_, true, true);
         if (rc != 0)
             return rc;
-        s = ::socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
+
+        s = transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
     }
 
 #ifdef ZMQ_HAVE_WINDOWS
@@ -202,11 +203,11 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
     //  On some systems, IPv4 mapping in IPv6 sockets is disabled by default.
     //  Switch it on in such cases.
     if (address.family () == AF_INET6)
-        enable_ipv4_mapping (s);
+        transport->tx_enable_ipv4_mapping (s);
 
     // Set the IP Type-Of-Service for the underlying socket
     if (options.tos != 0)
-        set_ip_type_of_service (s, options.tos);
+        transport->tx_set_ip_type_of_service (s, options.tos);
 
     //  Set the socket buffer limits for the underlying socket.
 #ifdef ZMQ_HAVE_WINDOWS

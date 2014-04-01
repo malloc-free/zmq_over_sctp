@@ -65,7 +65,7 @@ zmq::tcp_connecter_t::tcp_connecter_t (class io_thread_t *io_thread_,
     transport(transport_)
 {
     zmq_assert (addr);
-    zmq_assert (addr->protocol == "tcp");
+    zmq_assert (addr->protocol == "tcp" || addr->protocol == "sctp");
     addr->to_string (endpoint);
     socket = session-> get_socket();
 }
@@ -124,8 +124,8 @@ void zmq::tcp_connecter_t::out_event ()
         return;
     }
 
-    tune_tcp_socket (fd);
-    tune_tcp_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
+    transport->tx_tune_socket (fd);
+    transport->tx_set_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
 
     // remember our fd for ZMQ_SRCFD in messages
     socket->set_fd(fd);
@@ -231,8 +231,9 @@ int zmq::tcp_connecter_t::open ()
     zmq_assert (addr->resolved.tcp_addr != NULL);
 
     //  Create the socket.
-    s = open_socket (addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
-#ifdef ZMQ_HAVE_WINDOWS
+    //s = open_socket (addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
+    s = transport->tx_socket(addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
+    #ifdef ZMQ_HAVE_WINDOWS
     if (s == INVALID_SOCKET) {
         errno = wsa_error_to_errno (WSAGetLastError ());
         return -1;
@@ -245,24 +246,24 @@ int zmq::tcp_connecter_t::open ()
     //  On some systems, IPv4 mapping in IPv6 sockets is disabled by default.
     //  Switch it on in such cases.
     if (addr->resolved.tcp_addr->family () == AF_INET6)
-        enable_ipv4_mapping (s);
+        transport->tx_enable_ipv4_mapping (s);
 
     // Set the IP Type-Of-Service priority for this socket
     if (options.tos != 0)
-        set_ip_type_of_service (s, options.tos);
+        transport->tx_set_ip_type_of_service (s, options.tos);
 
     // Set the socket to non-blocking mode so that we get async connect().
-    unblock_socket (s);
+    transport->tx_unblock_socket (s);
 
     //  Set the socket buffer limits for the underlying socket.
     if (options.sndbuf != 0)
-        set_tcp_send_buffer (s, options.sndbuf);
+        transport->tx_set_send_buffer (s, options.sndbuf);
     if (options.rcvbuf != 0)
-        set_tcp_receive_buffer (s, options.rcvbuf);
+        transport->tx_set_receive_buffer (s, options.rcvbuf);
 
     // Set the IP Type-Of-Service for the underlying socket
     if (options.tos != 0)
-        set_ip_type_of_service (s, options.tos);
+        transport->tx_set_ip_type_of_service (s, options.tos);
 
     //  Connect to the remote peer.
 //    rc = ::connect (

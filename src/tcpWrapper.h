@@ -9,6 +9,8 @@
 #define TCPWRAPPER_H_
 
 #include "transport.h"
+
+#include <string>
 #include <sys/socket.h>
 
 namespace zmq {
@@ -53,6 +55,14 @@ public:
 			int keepalive_idle, int keepalive_intv);
 
 	void tx_tune_socket(int sockfd);
+
+	void tx_unblock_socket(int sockfd);
+
+	void tx_enable_ipv4_mapping(int sockfd);
+
+	void tx_get_peer_ip_address(int sockfd, std::string &ip_addr);
+
+	void tx_set_ip_type_of_service(int sockfd, int iptos);
 };
 
 } /* namespace zmq */
