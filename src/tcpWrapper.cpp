@@ -65,7 +65,7 @@ int Tcp_Wrapper::tx_accept(int sockfd, struct sockaddr *addr,
 
 int Tcp_Wrapper::tx_send(int sockfd, const void *buf, size_t len, int flags)
 {
-	//std::cout << "Using wrapper send" << std::endl;
+	std::cout << "Using wrapper send" << std::endl;
 	return send(sockfd, buf, len, flags);
 }
 
