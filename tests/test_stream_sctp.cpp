@@ -182,12 +182,12 @@ test_stream_to_stream (void)
     
     void *server = zmq_socket (ctx, ZMQ_STREAM);
     assert (server);
-    rc = zmq_bind (server, "tcp://127.0.0.1:9070");
+    rc = zmq_bind (server, "sctp://127.0.0.1:9070");
     assert (rc == 0);
 
     void *client = zmq_socket (ctx, ZMQ_STREAM);
     assert (client);
-    rc = zmq_connect (client, "tcp://localhost:9070");
+    rc = zmq_connect (client, "sctp://localhost:9070");
     assert (rc == 0);
     uint8_t id [256];
     size_t id_size = 256;
