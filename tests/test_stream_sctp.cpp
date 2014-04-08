@@ -18,6 +18,8 @@
 */
 
 #include "testutil.hpp"
+#include "../src/transport.h"
+#include "../src/sctpwrapper.h"
 
 //  ZMTP protocol greeting structure
 
@@ -54,16 +56,26 @@ test_stream_to_dealer (void)
     int zero = 0;
     rc = zmq_setsockopt (stream, ZMQ_LINGER, &zero, sizeof (zero));
     assert (rc == 0);
+    int heartbeat = 100;
+    struct t_option_t option;
+    option.option_ = ZMQ_SCTP_HB_INTVL;
+    option.optval_ = &heartbeat;
+
     rc = zmq_bind (stream, "sctp://127.0.0.1:5556");
     assert (rc == 0);
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+	assert (rc == 0);
+
 
     //  We'll be using this socket as the other peer
     void *dealer = zmq_socket (ctx, ZMQ_DEALER);
     assert (dealer);
-    rc = zmq_setsockopt (dealer, ZMQ_LINGER, &zero, sizeof (zero));
-    assert (rc == 0);
+    //rc = zmq_setsockopt (dealer, ZMQ_LINGER, &zero, sizeof (zero));
+    //assert (rc == 0);
     rc = zmq_connect (dealer, "sctp://localhost:5556");
-
+    assert (rc == 0);
+    //rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    //assert (rc == 0);
     //  Send a message on the dealer socket
     rc = zmq_send (dealer, "Hello", 5, 0);
     assert (rc == 5);
@@ -182,12 +194,12 @@ test_stream_to_stream (void)
     
     void *server = zmq_socket (ctx, ZMQ_STREAM);
     assert (server);
-    rc = zmq_bind (server, "tcp://127.0.0.1:9070");
+    rc = zmq_bind (server, "sctp://127.0.0.1:9070");
     assert (rc == 0);
 
     void *client = zmq_socket (ctx, ZMQ_STREAM);
     assert (client);
-    rc = zmq_connect (client, "tcp://localhost:9070");
+    rc = zmq_connect (client, "sctp://localhost:9070");
     assert (rc == 0);
     uint8_t id [256];
     size_t id_size = 256;

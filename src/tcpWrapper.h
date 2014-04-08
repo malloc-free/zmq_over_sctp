@@ -63,6 +63,10 @@ public:
 	void tx_get_peer_ip_address(int sockfd, std::string &ip_addr);
 
 	void tx_set_ip_type_of_service(int sockfd, int iptos);
+
+	transport_options_t *tx_get_options();
+
+	void tx_set_options(int sockd);
 };
 
 } /* namespace zmq */

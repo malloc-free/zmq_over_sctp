@@ -295,7 +295,8 @@ ZMQ_EXPORT char *zmq_msg_gets (zmq_msg_t *msg, char *property);
 #define ZMQ_IPC_FILTER_PID 58
 #define ZMQ_IPC_FILTER_UID 59
 #define ZMQ_IPC_FILTER_GID 60
-#define ZMQ_CONNECT_RID 61 
+#define ZMQ_CONNECT_RID 61
+#define ZMQ_TRANSPORT_OPTION 62
 
 /*  Message options                                                           */
 #define ZMQ_MORE 1

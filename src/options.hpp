@@ -29,6 +29,8 @@
 #include "tcp_address.hpp"
 #include "../include/zmq.h"
 
+#include "transport.h"
+
 #if defined ZMQ_HAVE_SO_PEERCRED || defined ZMQ_HAVE_LOCAL_PEERCRED
 #include <sys/types.h>
 #endif
@@ -42,7 +44,9 @@ namespace zmq
 {
     struct options_t
     {
+    	options_t (transport_options_t *options);
         options_t ();
+
 
         int setsockopt (int option_, const void *optval_, size_t optvallen_);
         int getsockopt (int option_, void *optval_, size_t *optvallen_);
@@ -164,6 +168,8 @@ namespace zmq
         //  Cannot receive multi-part messages.
         //  Ignores hwm
         bool conflate;
+
+        transport_options_t *t_options;
     };
 }
 

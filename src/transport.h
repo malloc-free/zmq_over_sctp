@@ -13,9 +13,36 @@
 #include <netinet/in.h>
 #include <string>
 
-namespace zmq {
+extern "C"
+{
+struct t_option_t
+{
+	int option_;
+	void *optval_;
+};
+}
 
-class Transport {
+namespace zmq
+{
+
+//Passed into setSockOpt to set the specified option
+
+
+class transport_options_t
+{
+public:
+	virtual ~transport_options_t (){};
+
+	virtual int setsockopt(const void *optval_, size_t optvallen_) = 0;
+
+	virtual int getsockopt(void *optval_, size_t *optvallen_) = 0;
+};
+
+/**
+ * Interface for trasport protocols.
+ */
+class Transport
+{
 public:
 
 	virtual ~Transport() {};
@@ -60,6 +87,10 @@ public:
 	virtual void tx_get_peer_ip_address(int sockfd, std::string &ip_addr_) = 0;
 
 	virtual void tx_set_ip_type_of_service(int sockfd, int iptos) = 0;
+
+	virtual transport_options_t *tx_get_options() = 0;
+
+	virtual void tx_set_options(int sockd) = 0;
 };
 
 } /* namespace zmq */

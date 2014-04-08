@@ -21,6 +21,7 @@
 #define __ZMQ_OBJECT_HPP_INCLUDED__
 
 #include "stdint.hpp"
+#include "transport.h"
 
 namespace zmq
 {

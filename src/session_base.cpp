@@ -497,6 +497,8 @@ void zmq::session_base_t::start_connecting (bool wait_)
     		txpt = new (std::nothrow) sctp_wrapper();
     	}
 
+    	options.t_options = txpt->tx_get_options();
+
         tcp_connecter_t *connecter = new (std::nothrow) tcp_connecter_t (
             io_thread, this, options, addr, wait_, txpt);
         alloc_assert (connecter);

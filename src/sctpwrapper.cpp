@@ -16,13 +16,45 @@
 
 namespace zmq {
 
-sctp_wrapper::sctp_wrapper() {
-	// TODO Auto-generated constructor stub
+///////////////////// sctp_options_t member functions ////////////////////
 
+sctp_options_t::sctp_options_t() :
+		heartbeat_intvl(-1)
+{
 }
 
-sctp_wrapper::~sctp_wrapper() {
-	// TODO Auto-generated destructor stub
+int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
+{
+	t_option_t *t_opt = (t_option_t*)optval_;
+
+	switch(t_opt->option_)
+	{
+	case ZMQ_SCTP_HB_INTVL :
+		heartbeat_intvl = *((int*)t_opt->optval_);
+		return 0;
+	default : break;
+
+	}
+
+	return -1;
+}
+
+int sctp_options_t::getsockopt(void *optval_, size_t *optvallen_)
+{
+	return 0;
+}
+
+////////////////// sctp_wrapper member functions ////////////////////////
+
+sctp_wrapper::sctp_wrapper() :
+	options()
+{
+	options = new sctp_options_t;
+}
+
+sctp_wrapper::~sctp_wrapper()
+{
+	delete(options);
 }
 
 int sctp_wrapper::tx_socket(int domain, int type, int protocol)
@@ -149,6 +181,36 @@ void sctp_wrapper::tx_set_ip_type_of_service(int sockfd, int iptos)
 {
 	std::cout << "Using set_ip_type_of_service" << std::endl;
 	set_ip_type_of_service(sockfd, iptos);
+}
+
+transport_options_t *sctp_wrapper::tx_get_options()
+{
+	return options;
+}
+
+int sctp_wrapper::tx_set_heartbeat_intvl(int sockfd, int value)
+{
+	struct sctp_paddrparams heartbeat;
+	memset(&heartbeat, 0 ,sizeof(struct sctp_paddrparams));
+
+	heartbeat.spp_hbinterval = value;
+	heartbeat.spp_flags = SPP_HB_ENABLE;
+
+	if(setsockopt(sockfd, SOL_SOCKET, SCTP_PEER_ADDR_PARAMS, &heartbeat,
+			sizeof(struct sctp_paddrparams)) == -1) {
+		perror("sctp_wrapper: tx_set_heartbeat_intvl");
+	}
+
+	return 0;
+}
+
+void sctp_wrapper::tx_set_options(int sockfd)
+{
+	if(options->heartbeat_intvl != -1){
+		tx_set_heartbeat_intvl(sockfd, options->heartbeat_intvl);
+		std::cout << "heartbeat set to :" << options->heartbeat_intvl
+				<< std::endl;
+	}
 }
 
 } /* namespace zmq */

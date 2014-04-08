@@ -394,10 +394,13 @@ int zmq::socket_base_t::bind (const char *addr_)
 
     	if(protocol == "tcp"){
     		txpt = new (std::nothrow) Tcp_Wrapper();
+
     	}
     	else{
     		txpt = new (std::nothrow) sctp_wrapper();
     	}
+
+    	options.t_options = txpt->tx_get_options();
 
         tcp_listener_t *listener = new (std::nothrow) tcp_listener_t (
             io_thread, this, options, txpt);

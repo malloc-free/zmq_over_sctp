@@ -137,4 +137,14 @@ void Tcp_Wrapper::tx_set_ip_type_of_service(int sockfd, int iptos)
 	set_ip_type_of_service(sockfd, iptos);
 }
 
+transport_options_t *Tcp_Wrapper::tx_get_options()
+{
+	return NULL;
+}
+
+void Tcp_Wrapper::tx_set_options(int sockd)
+{
+
+}
+
 } /* namespace zmq */

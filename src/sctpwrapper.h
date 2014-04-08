@@ -13,7 +13,29 @@
 
 namespace zmq {
 
-class sctp_wrapper: public zmq::Transport {
+#define ZMQ_SCTP_HB_INTVL 1
+#define ZMQ_SCTP_ADD_IP 2
+#define ZMQ_SCTP_REM_IP 3
+
+class sctp_options_t : public zmq::transport_options_t
+{
+	friend class sctp_wrapper;
+
+public:
+	sctp_options_t();
+
+public:
+	int setsockopt(const void *optval_, size_t optvallen_);
+
+	int getsockopt(void *optval_, size_t *optvallen_);
+
+private:
+	int heartbeat_intvl;
+};
+
+class sctp_wrapper : public zmq::Transport
+{
+
 public:
 	sctp_wrapper();
 	virtual ~sctp_wrapper();
@@ -58,6 +80,14 @@ public:
 	void tx_get_peer_ip_address(int sockfd, std::string &ip_addr);
 
 	void tx_set_ip_type_of_service(int sockfd, int iptos);
+
+	transport_options_t *tx_get_options();
+
+	void tx_set_options(int sockd);
+
+private:
+	sctp_options_t *options;
+	int tx_set_heartbeat_intvl(int sockfd, int value);
 };
 
 } /* namespace zmq */
