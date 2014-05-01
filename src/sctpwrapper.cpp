@@ -35,7 +35,7 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 	switch(t_opt->option_)
 	{
 	case ZMQ_SCTP_HB_INTVL :
-		std::cout << "Setting sctp heartbeat value" << *((int*)t_opt->optval_)
+		std::cout << "Setting sctp heartbeat value: " << *((int*)t_opt->optval_)
 			<< std::endl;
 		heartbeat_intvl = *((int*)t_opt->optval_);
 
@@ -45,6 +45,8 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 		return tx_add_address((char*)t_opt->optval_);
 
 	case ZMQ_SCTP_RTO :
+		std::cout << "Setting sctp rto value: " << *((int*)t_opt->optval_)
+			<< std::endl;
 		rto_max = *((int*)t_opt->optval_);
 
 		return 0;

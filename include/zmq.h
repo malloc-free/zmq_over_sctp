@@ -50,6 +50,8 @@ struct t_option_t
 	char *transport;
 };
 
+
+
 #if !defined _WIN32_WCE
 #include <errno.h>
 #endif
@@ -228,7 +230,6 @@ ZMQ_EXPORT int zmq_msg_get (zmq_msg_t *msg, int property);
 ZMQ_EXPORT int zmq_msg_set (zmq_msg_t *msg, int property, int optval);
 ZMQ_EXPORT char *zmq_msg_gets (zmq_msg_t *msg, char *property);
 
-
 /******************************************************************************/
 /*  0MQ socket definition.                                                    */
 /******************************************************************************/
@@ -376,6 +377,10 @@ ZMQ_EXPORT int zmq_socket_monitor (void *s, const char *addr, int events);
 
 ZMQ_EXPORT int zmq_sendmsg (void *s, zmq_msg_t *msg, int flags);
 ZMQ_EXPORT int zmq_recvmsg (void *s, zmq_msg_t *msg, int flags);
+
+
+//Transport stuff - added for pyzmq.
+ZMQ_EXPORT int zmq_set_tx_value(void *s, int option_, void *optval_);
 
 /*  Experimental                                                              */
 struct iovec;

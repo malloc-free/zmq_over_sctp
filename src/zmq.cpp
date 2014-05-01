@@ -262,6 +262,19 @@ int zmq_setsockopt (void *s_, int option_, const void *optval_,
     return result;
 }
 
+int zmq_set_tx_value(void *s, int option_, void *optval_)
+{
+	struct t_option_t option;
+
+	option.transport = (char*)"sctp";
+	option.option_ = option_;
+	option.optval_ = optval_;
+
+	return zmq_setsockopt(s, ZMQ_TRANSPORT_OPTION, &option,
+			sizeof(option));
+}
+
+
 int zmq_getsockopt (void *s_, int option_, void *optval_, size_t *optvallen_)
 {
     if (!s_ || !((zmq::socket_base_t*) s_)->check_tag ()) {

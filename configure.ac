@@ -166,7 +166,7 @@ case "${host_os}" in
     *linux*)
         # Define on Linux to enable all library features. Define if using a gnu compiler
         if test "x$GXX" = "xyes"; then
-            CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
+            CPPFLAGS="-D_GNU_SOURCE -fPIC $CPPFLAGS"
         fi
         AC_DEFINE(ZMQ_HAVE_LINUX, 1, [Have Linux OS])
         libzmq_on_linux="yes"

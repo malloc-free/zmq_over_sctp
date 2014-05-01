@@ -195,7 +195,7 @@ endif
 endif
 endif
 
-libzmq_la_CXXFLAGS = @LIBZMQ_EXTRA_CXXFLAGS@
+libzmq_la_CXXFLAGS = -fPIC @LIBZMQ_EXTRA_CXXFLAGS@
 
 if BUILD_PGM
 libzmq_la_CPPFLAGS = -I$(top_srcdir)/@pgm_srcdir@/include/
