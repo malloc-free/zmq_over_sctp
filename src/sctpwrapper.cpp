@@ -256,23 +256,24 @@ int sctp_wrapper::tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addr
 {
 	std::cout << "setting addresses" << std::endl;
 	std::vector<tcp_address_t*>::iterator it = addresses->begin();
-	std::vector<struct sockaddr*> res_addr;
+	//std::vector<struct sockaddr*> res_addr;
 
 	for(;it != addresses->end(); ++it) {
 		std::string add_str;
 		(*it)->to_string(add_str);
 		std::cout << "adding address" << add_str << std::endl;
-		res_addr.push_back((struct sockaddr*)((*it)->addr()));
+		//res_addr.push_back((struct sockaddr*)((*it)->addr()));
+		int rc = sctp_bindx(sockfd, (struct sockaddr*)((*it)->addr()),
+					1, SCTP_BINDX_ADD_ADDR);
+
+		if(rc != 0) {
+			perror("Setting addresses");
+
+			return rc;
+		}
 	}
 
-	int rc = sctp_bindx(sockfd, res_addr[0],
-			res_addr.size(), SCTP_BINDX_ADD_ADDR);
 
-	if(rc != 0) {
-		perror("Setting addresses");
-
-		return rc;
-	}
 
 	return 0;
 }
