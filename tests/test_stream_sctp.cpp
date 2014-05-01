@@ -56,26 +56,42 @@ test_stream_to_dealer (void)
     int zero = 0;
     rc = zmq_setsockopt (stream, ZMQ_LINGER, &zero, sizeof (zero));
     assert (rc == 0);
-    int heartbeat = 100;
+    int heartbeat = 5000;
+    int rto = 2000;
     struct t_option_t option;
     option.option_ = ZMQ_SCTP_HB_INTVL;
     option.optval_ = &heartbeat;
-
-    rc = zmq_bind (stream, "sctp://127.0.0.1:5556");
-    assert (rc == 0);
+    option.transport = (char*)"sctp";
     rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
-	assert (rc == 0);
+    assert (rc == 0);
+    option.option_ = ZMQ_SCTP_RTO;
+    option.optval_ = &rto;
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    assert (rc == 0);
+    option.option_ = ZMQ_SCTP_ADD_IP;
+    option.optval_ = (char*)"192.168.0.11:5556";
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    assert (rc == 0);
+    rc = zmq_bind (stream, "sctp://192.168.0.10:5556");
+    assert (rc == 0);
+
 
 
     //  We'll be using this socket as the other peer
     void *dealer = zmq_socket (ctx, ZMQ_DEALER);
     assert (dealer);
-    //rc = zmq_setsockopt (dealer, ZMQ_LINGER, &zero, sizeof (zero));
-    //assert (rc == 0);
-    rc = zmq_connect (dealer, "sctp://localhost:5556");
+    rc = zmq_setsockopt (dealer, ZMQ_LINGER, &zero, sizeof (zero));
     assert (rc == 0);
-    //rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
-    //assert (rc == 0);
+    option.option_ = ZMQ_SCTP_HB_INTVL;
+    option.optval_ = &heartbeat;
+    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    assert (rc == 0);
+    option.option_ = ZMQ_SCTP_RTO;
+    option.optval_ = &rto;
+    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_connect (dealer, "sctp://192.168.0.10:5556");
+    assert (rc == 0);
+
     //  Send a message on the dealer socket
     rc = zmq_send (dealer, "Hello", 5, 0);
     assert (rc == 5);

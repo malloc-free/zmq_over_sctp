@@ -12,15 +12,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <string>
-
-extern "C"
-{
-struct t_option_t
-{
-	int option_;
-	void *optval_;
-};
-}
+#include <../include/zmq.h>
 
 namespace zmq
 {
@@ -90,7 +82,7 @@ public:
 
 	virtual transport_options_t *tx_get_options() = 0;
 
-	virtual void tx_set_options(int sockd) = 0;
+	virtual void tx_set_options(int sockd, transport_options_t *options) = 0;
 };
 
 } /* namespace zmq */

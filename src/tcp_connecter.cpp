@@ -265,7 +265,10 @@ int zmq::tcp_connecter_t::open ()
     if (options.tos != 0)
         transport->tx_set_ip_type_of_service (s, options.tos);
 
-    transport->tx_set_options(s);
+    if(options.t_options != NULL) {
+    	transport->tx_set_options(s, options.t_options);
+    }
+
     //  Connect to the remote peer.
 //    rc = ::connect (
 //        s, addr->resolved.tcp_addr->addr (),

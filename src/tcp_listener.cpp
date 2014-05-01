@@ -209,7 +209,10 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
     if (options.tos != 0)
         transport->tx_set_ip_type_of_service (s, options.tos);
 
-    transport->tx_set_options(s);
+    if(options.t_options != NULL) {
+    	transport->tx_set_options(s, options.t_options);
+    }
+
     //  Set the socket buffer limits for the underlying socket.
 #ifdef ZMQ_HAVE_WINDOWS
     if (options.sndbuf != 0)

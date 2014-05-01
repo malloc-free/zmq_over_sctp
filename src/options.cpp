@@ -22,6 +22,7 @@
 #include "options.hpp"
 #include "err.hpp"
 #include "../include/zmq_utils.h"
+#include "sctpwrapper.h"
 
 zmq::options_t::options_t() :
 sndhwm (1000),
@@ -441,11 +442,19 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
             break;
 
         case ZMQ_TRANSPORT_OPTION:
-        	if(t_options != NULL) {
-        		t_options->setsockopt(optval_, optvallen_);
-        		return 0;
-        	}
-        	break;
+			if(t_options == NULL) {
+				t_options = create_options(((t_option_t*)optval_)->transport);
+
+				if(t_options == NULL) {
+					return -1;
+				}
+			}
+
+			t_options->setsockopt(optval_, optvallen_);
+
+			return 0;
+
+			break;
         default:
             break;
     }
@@ -738,3 +747,14 @@ int zmq::options_t::getsockopt (int option_, void *optval_, size_t *optvallen_)
     errno = EINVAL;
     return -1;
 }
+
+zmq::transport_options_t *zmq::options_t::create_options(const char *transport)
+{
+
+	if(!(strcmp(transport, "sctp"))) {
+		return new sctp_options_t();
+	}
+
+	return NULL;
+}
+

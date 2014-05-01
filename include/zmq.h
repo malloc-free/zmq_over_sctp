@@ -42,6 +42,14 @@
 extern "C" {
 #endif
 
+//Added for transport stuff
+struct t_option_t
+{
+	int option_;
+	void *optval_;
+	char *transport;
+};
+
 #if !defined _WIN32_WCE
 #include <errno.h>
 #endif

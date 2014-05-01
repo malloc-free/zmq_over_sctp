@@ -9,13 +9,18 @@
 #define SCTPWRAPPER_H_
 
 #include "transport.h"
+#include "tcp_address.hpp"
+#include "../include/zmq.h"
+
 #include <string>
+#include <vector>
 
 namespace zmq {
 
-#define ZMQ_SCTP_HB_INTVL 1
-#define ZMQ_SCTP_ADD_IP 2
-#define ZMQ_SCTP_REM_IP 3
+#define ZMQ_SCTP_HB_INTVL 	1
+#define ZMQ_SCTP_ADD_IP 	2
+#define ZMQ_SCTP_REM_IP 	3
+#define ZMQ_SCTP_RTO 		4
 
 class sctp_options_t : public zmq::transport_options_t
 {
@@ -29,8 +34,16 @@ public:
 
 	int getsockopt(void *optval_, size_t *optvallen_);
 
+	int tx_add_address(char *addr_str);
+
+	int tx_remove_address(char *addr_str);
+
+	int tx_set_rto(int rto);
+
 private:
 	int heartbeat_intvl;
+	int rto_max;
+	std::vector<tcp_address_t*> addresses;
 };
 
 class sctp_wrapper : public zmq::Transport
@@ -83,11 +96,16 @@ public:
 
 	transport_options_t *tx_get_options();
 
-	void tx_set_options(int sockd);
+	void tx_set_options(int sockd, transport_options_t *options);
 
 private:
 	sctp_options_t *options;
+
 	int tx_set_heartbeat_intvl(int sockfd, int value);
+
+	int tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addresses);
+
+	int tx_set_rto(int sockfd, int value);
 };
 
 } /* namespace zmq */

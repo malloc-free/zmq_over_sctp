@@ -66,7 +66,7 @@ public:
 
 	transport_options_t *tx_get_options();
 
-	void tx_set_options(int sockd);
+	void tx_set_options(int sockd, transport_options_t *option);
 };
 
 } /* namespace zmq */

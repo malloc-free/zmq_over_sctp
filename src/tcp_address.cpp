@@ -26,6 +26,9 @@
 #include "err.hpp"
 #include "ip.hpp"
 
+//Added for testing
+#include "iostream"
+
 #ifdef ZMQ_HAVE_WINDOWS
 #include "windows.hpp"
 #else
@@ -487,7 +490,7 @@ int zmq::tcp_address_mask_t::resolve (const char *name_, bool ipv6_)
 {
     // Find '/' at the end that separates address from the cidr mask number.
     // Allow empty mask clause and threat it like '/32' for ipv4 or '/128' for ipv6.
-    std::string addr_str, mask_str;
+	std::string addr_str, mask_str;
     const char *delimiter = strrchr (name_, '/');
     if (delimiter != NULL) {
         addr_str.assign (name_, delimiter - name_);

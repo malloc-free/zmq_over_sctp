@@ -125,6 +125,9 @@ namespace zmq
         int tcp_keepalive_idle;
         int tcp_keepalive_intvl;
 
+        // Create transport options
+        transport_options_t *create_options(const char* transport);
+
         // TCP accept() filters
         typedef std::vector <tcp_address_mask_t> tcp_accept_filters_t;
         tcp_accept_filters_t tcp_accept_filters;
