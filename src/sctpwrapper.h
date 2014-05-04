@@ -21,6 +21,12 @@ namespace zmq {
 #define ZMQ_SCTP_ADD_IP 	2
 #define ZMQ_SCTP_REM_IP 	3
 #define ZMQ_SCTP_RTO 		4
+#define ZMQ_SCTP_MAX_IN		5
+#define ZMQ_SCTP_MAX_OUT	6
+
+#define DEFAULT_MAX_IN		5
+#define DEFAULT_MAX_OUT		5
+#define DEFAULT_MAX_ATT		2
 
 class sctp_options_t : public zmq::transport_options_t
 {
@@ -43,6 +49,8 @@ public:
 private:
 	int heartbeat_intvl;
 	int rto_max;
+	int stream_num_out;
+	int stream_num_in;
 	std::vector<tcp_address_t*> addresses;
 };
 
@@ -106,6 +114,8 @@ private:
 	int tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addresses);
 
 	int tx_set_rto(int sockfd, int value);
+
+	int tx_set_num_streams(int sockfd, int in, int out);
 };
 
 } /* namespace zmq */

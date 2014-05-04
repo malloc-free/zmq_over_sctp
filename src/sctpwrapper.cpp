@@ -24,7 +24,9 @@ namespace zmq {
 
 sctp_options_t::sctp_options_t() :
 		heartbeat_intvl(-1),
-		rto_max(-1)
+		rto_max(-1),
+		stream_num_out(DEFAULT_MAX_OUT),
+		stream_num_in(DEFAULT_MAX_IN)
 {
 }
 
@@ -49,6 +51,14 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 			<< std::endl;
 		rto_max = *((int*)t_opt->optval_);
 
+		return 0;
+
+	case ZMQ_SCTP_MAX_IN :
+		stream_num_in = *((int*)t_opt->optval_);
+		return 0;
+
+	case ZMQ_SCTP_MAX_OUT :
+		stream_num_out = *((int*)t_opt->optval_);
 		return 0;
 
 	default : break;
@@ -298,11 +308,31 @@ int sctp_wrapper::tx_set_rto(int sockfd, int value)
 	return 0;
 }
 
+int sctp_wrapper::tx_set_num_streams(int sockfd, int in, int out)
+{
+	struct sctp_initmsg init;
+	memset(&init, 0, sizeof(init));
+
+	init.sinit_max_instreams = in;
+	init.sinit_num_ostreams = out;
+
+	int rc = setsockopt(sockfd, IPPROTO_SCTP, SCTP_INITMSG,
+			&init, sizeof(init));
+
+	if(rc != 0) {
+		perror("Setting num streams");
+		return rc;
+	}
+
+	return 0;
+}
+
 void sctp_wrapper::tx_set_options(int sockfd, transport_options_t *options_)
 {
 
 	sctp_options_t *sctp_opt = (sctp_options_t*)options_;
 	options = sctp_opt;
+
 	std::cout << "Setting options" << std::endl;
 	std::cout << "heartbeat = " << sctp_opt->heartbeat_intvl << std::endl;
 	if(sctp_opt->heartbeat_intvl != -1) {
@@ -315,6 +345,14 @@ void sctp_wrapper::tx_set_options(int sockfd, transport_options_t *options_)
 	if(sctp_opt->rto_max != -1) {
 		tx_set_rto(sockfd, sctp_opt->rto_max);
 	}
+
+	std::cout << "max streams out = " << sctp_opt->stream_num_out
+			<< std::endl;
+	std::cout << "max streams in = " << sctp_opt->stream_num_in
+			<< std::endl;
+
+	tx_set_num_streams(sockfd, sctp_opt->stream_num_in,
+			sctp_opt->stream_num_out);
 }
 
 } /* namespace zmq */
