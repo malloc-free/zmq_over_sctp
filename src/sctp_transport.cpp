@@ -223,14 +223,14 @@ int sctp_transport::tx_getsockopt(int sockfd, int level, int optname,
 		void *optval, socklen_t *optlen)
 {
 	//std::cout << "Using sctp getsockotpt" << std::endl;
-	return getsockopt(sockfd, SOL_SCTP, optname, optval, optlen);
+	return getsockopt(sockfd, level, optname, optval, optlen);
 }
 
 int sctp_transport::tx_setsockopt(int sockfd, int level, int optname,
 		const void *optval, socklen_t optlen)
 {
 	//std::cout << "Using sctp setsockopt" << std::endl;
-	return setsockopt(sockfd, SOL_SCTP, optname, optval, optlen);
+	return setsockopt(sockfd, level, optname, optval, optlen);
 }
 
 void sctp_transport::tx_set_receive_buffer(int sockfd, int bufsize)
@@ -253,7 +253,7 @@ void sctp_transport::tx_set_keepalives(int sockfd, int keepalive, int keepalive_
 	std::cout << "Using sctp set_keepalives" << std::endl;
     if (keepalive != -1)
     {
-        int rc = setsockopt (sockfd, SOL_SCTP, SO_KEEPALIVE, (char*) &keepalive, sizeof (int));
+        int rc = setsockopt (sockfd, SOL_SOCKET, SO_KEEPALIVE, (char*) &keepalive, sizeof (int));
         errno_assert (rc == 0);
     }
 #endif
