@@ -50,7 +50,13 @@ struct t_option_t
 	char *transport;
 };
 
-
+//Transport options for sctp wrapper
+#define ZMQ_SCTP_HB_INTVL 	1
+#define ZMQ_SCTP_ADD_IP 	2
+#define ZMQ_SCTP_REM_IP 	3
+#define ZMQ_SCTP_RTO 		4
+#define ZMQ_SCTP_MAX_IN		5
+#define ZMQ_SCTP_MAX_OUT	6
 
 #if !defined _WIN32_WCE
 #include <errno.h>

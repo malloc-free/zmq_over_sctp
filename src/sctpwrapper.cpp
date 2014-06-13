@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <assert.h>
 
 namespace zmq {
 
@@ -34,24 +35,39 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 {
 	t_option_t *t_opt = (t_option_t*)optval_;
 
+	if(!(t_opt->optval_)) {
+		return -1;
+	}
+
+	bool is_int = (optvallen_ == sizeof(int));
+	int value;
+
 	switch(t_opt->option_)
 	{
 	case ZMQ_SCTP_HB_INTVL :
-		std::cout << "Setting sctp heartbeat value: " << *((int*)t_opt->optval_)
-			<< std::endl;
-		heartbeat_intvl = *((int*)t_opt->optval_);
 
-		return 0;
+		value = *((int*)t_opt->optval_);
+
+		if(value > 0 && is_int) {
+			heartbeat_intvl = *((int*)t_opt->optval_);
+			return 0;
+		}
+
+		break;
 
 	case ZMQ_SCTP_ADD_IP :
 		return tx_add_address((char*)t_opt->optval_);
 
 	case ZMQ_SCTP_RTO :
-		std::cout << "Setting sctp rto value: " << *((int*)t_opt->optval_)
-			<< std::endl;
-		rto_max = *((int*)t_opt->optval_);
 
-		return 0;
+		value = *((int*)t_opt->optval_);
+
+		if(value > 0 && is_int) {
+			rto_max = *((int*)t_opt->optval_);
+			return 0;
+		}
+
+		break;
 
 	case ZMQ_SCTP_MAX_IN :
 		stream_num_in = *((int*)t_opt->optval_);
@@ -70,7 +86,41 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 
 int sctp_options_t::getsockopt(void *optval_, size_t *optvallen_)
 {
-	return 0;
+	std::cout << "Getting sctp options" << std::endl;
+
+	t_option_t *t_opt = (t_option_t*)optval_;
+
+	switch(t_opt->option_)
+		{
+		case ZMQ_SCTP_HB_INTVL :
+			*((int*)t_opt->optval_) = heartbeat_intvl;
+			std::cout << "setting sctp heartbeat value: " << *((int*)t_opt->optval_)
+					<< std::endl;
+			return 0;
+
+		case ZMQ_SCTP_ADD_IP :
+			return -1;
+
+		case ZMQ_SCTP_RTO :
+			std::cout << "Getting sctp rto value: " << *((int*)t_opt->optval_)
+				<< std::endl;
+			*((int*)t_opt->optval_) = rto_max;
+
+			return 0;
+
+		case ZMQ_SCTP_MAX_IN :
+			*((int*)t_opt->optval_) = stream_num_in;
+			return 0;
+
+		case ZMQ_SCTP_MAX_OUT :
+			*((int*)t_opt->optval_) = stream_num_out;
+			return 0;
+
+		default : break;
+
+		}
+
+		return -1;
 }
 
 int sctp_options_t::tx_add_address(char *addr_str)
@@ -80,6 +130,7 @@ int sctp_options_t::tx_add_address(char *addr_str)
 	int rc = addr->resolve(addr_str, true, false);
 
 	if(rc != 0) {
+		delete(addr);
 		return rc;
 	}
 
@@ -250,15 +301,37 @@ transport_options_t *sctp_wrapper::tx_get_options()
 
 int sctp_wrapper::tx_set_heartbeat_intvl(int sockfd, int value)
 {
+
+//	if(getsockopt(sockfd, SOL_SOCKET, SCTP_PEER_ADDR_PARAMS, &hb, &l) == -1) {
+//			perror("sctp_wrapper: getsockopt");
+//	}
+//	else {
+//		std::cout << "heartbeat def = " << hb.spp_hbinterval << std::endl;
+//	}
+	std::cout << "hb to set = " << value << std::endl;
+
 	struct sctp_paddrparams heartbeat;
 	memset(&heartbeat, 0 ,sizeof(struct sctp_paddrparams));
 
 	heartbeat.spp_hbinterval = value;
 	heartbeat.spp_flags = SPP_HB_ENABLE;
+	heartbeat.spp_pathmaxrxt = 1;
 
-	if(setsockopt(sockfd, SOL_SOCKET, SCTP_PEER_ADDR_PARAMS, &heartbeat,
+	if(setsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &heartbeat,
 			sizeof(struct sctp_paddrparams)) == -1) {
 		perror("sctp_wrapper: tx_set_heartbeat_intvl");
+	}
+
+	struct sctp_paddrparams hb;
+	memset(&hb, 0, sizeof(struct sctp_paddrparams));
+	socklen_t l = sizeof(struct sctp_paddrparams);
+
+
+	if(getsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &hb, &l) == -1) {
+		perror("sctp_wrapper: getsockopt");
+	}
+	else {
+		std::cout << "heartbeat new = " << hb.spp_hbinterval << std::endl;
 	}
 
 	return 0;
@@ -284,8 +357,6 @@ int sctp_wrapper::tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addr
 			return rc;
 		}
 	}
-
-
 
 	return 0;
 }
@@ -332,6 +403,14 @@ void sctp_wrapper::tx_set_options(int sockfd, transport_options_t *options_)
 
 	sctp_options_t *sctp_opt = (sctp_options_t*)options_;
 	options = sctp_opt;
+
+	struct sctp_event_subscribe events;
+	memset(&events, 0, sizeof(events));
+	events.sctp_data_io_event = 1;
+
+	if(setsockopt(sockfd, IPPROTO_SCTP, SCTP_EVENTS, &events, sizeof(events)) == -1) {
+		perror("set events");
+	}
 
 	std::cout << "Setting options" << std::endl;
 	std::cout << "heartbeat = " << sctp_opt->heartbeat_intvl << std::endl;

@@ -62,20 +62,18 @@ test_stream_to_dealer (void)
     option.option_ = ZMQ_SCTP_HB_INTVL;
     option.optval_ = &heartbeat;
     option.transport = (char*)"sctp";
-    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(int));
     assert (rc == 0);
     option.option_ = ZMQ_SCTP_RTO;
     option.optval_ = &rto;
-    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(int));
     assert (rc == 0);
     option.option_ = ZMQ_SCTP_ADD_IP;
     option.optval_ = (char*)"192.168.0.11:5556";
-    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_setsockopt (stream, ZMQ_TRANSPORT_OPTION, &option, sizeof(17));
     assert (rc == 0);
     rc = zmq_bind (stream, "sctp://192.168.0.10:5556");
     assert (rc == 0);
-
-
 
     //  We'll be using this socket as the other peer
     void *dealer = zmq_socket (ctx, ZMQ_DEALER);
@@ -84,11 +82,11 @@ test_stream_to_dealer (void)
     assert (rc == 0);
     option.option_ = ZMQ_SCTP_HB_INTVL;
     option.optval_ = &heartbeat;
-    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(int));
     assert (rc == 0);
     option.option_ = ZMQ_SCTP_RTO;
     option.optval_ = &rto;
-    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(t_option_t));
+    rc = zmq_setsockopt (dealer, ZMQ_TRANSPORT_OPTION, &option, sizeof(int));
     rc = zmq_connect (dealer, "sctp://192.168.0.10:5556");
     assert (rc == 0);
 

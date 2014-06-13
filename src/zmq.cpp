@@ -19,6 +19,7 @@
 #define ZMQ_TYPE_UNSAFE
 
 #include "poller.hpp"
+#include <iostream>
 
 //  On AIX platform, poll.h has to be included first to get consistent
 //  definition of pollfd structure (AIX uses 'reqevents' and 'retnevents'

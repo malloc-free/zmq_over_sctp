@@ -18,6 +18,7 @@
 */
 
 #include <string.h>
+#include <iostream>
 
 #include "options.hpp"
 #include "err.hpp"
@@ -450,9 +451,7 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
 				}
 			}
 
-			t_options->setsockopt(optval_, optvallen_);
-
-			return 0;
+			return t_options->setsockopt(optval_, optvallen_);
 
 			break;
         default:
@@ -730,10 +729,18 @@ int zmq::options_t::getsockopt (int option_, void *optval_, size_t *optvallen_)
 #       endif
 
         case ZMQ_TRANSPORT_OPTION:
-        	if(t_options != NULL) {
-        		t_options->getsockopt(optval_, optvallen_);
-        		return 0;
-        	}
+        	std::cout << "zmq transport option called" << std::endl;
+       			if(t_options == NULL) {
+       				t_options = create_options(((t_option_t*)optval_)->transport);
+
+       				if(t_options == NULL) {
+       					return -1;
+       				}
+       			}
+
+       			return t_options->getsockopt(optval_, optvallen_);
+
+       			break;
 
         	break;
         case ZMQ_CONFLATE:
