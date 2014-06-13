@@ -164,27 +164,27 @@ sctp_transport::~sctp_transport()
 
 int sctp_transport::tx_socket(int domain, int type, int protocol)
 {
-	//std::cout << "Using sctp socket" << std::endl;
+	std::cout << "Using sctp socket" << std::endl;
 	return socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 }
 
 int sctp_transport::tx_connect(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
-	//std::cout << "Using sctp connect" << std::endl;
+	std::cout << "Using sctp connect" << std::endl;
 	return connect(sockfd, addr, addrlen);
 }
 
 int sctp_transport::tx_listen(int sockfd, int backlog)
 {
-	//std::cout << "Using sctp listen" << std::endl;
+	std::cout << "Using sctp listen" << std::endl;
 	return listen(sockfd, backlog);
 }
 
 int sctp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
-	//std::cout << "Using sctp bind" << std::endl;
+	std::cout << "Using sctp bind" << std::endl;
 	int rc = bind(sockfd, addr, addrlen);
 
 	if(options->addresses.size() != 0) {
@@ -197,51 +197,51 @@ int sctp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
 int sctp_transport::tx_accept(int sockfd, struct sockaddr *addr,
 		socklen_t *addrlen)
 {
-	//std::cout << "Using sctp accept" << std::endl;
+	std::cout << "Using sctp accept" << std::endl;
 	return accept(sockfd, addr, addrlen);
 }
 
 int sctp_transport::tx_send(int sockfd, const void *buf, size_t len, int flags)
 {
-	//std::cout << "Using sctp send" << std::endl;
+	std::cout << "Using sctp send" << std::endl;
 	return send(sockfd, buf, len, flags);
 }
 
 int sctp_transport::tx_recv(int sockfd, void *buf, size_t len, int flags)
 {
-	//std::cout << "Using sctp recv" << std::endl;
+	std::cout << "Using sctp recv" << std::endl;
 	return recv(sockfd, buf, len, flags);
 }
 
 int sctp_transport::tx_close(int fd)
 {
-	//std::cout << "Using sctp close" << std::endl;
+	std::cout << "Using sctp close" << std::endl;
 	return close(fd);
 }
 
 int sctp_transport::tx_getsockopt(int sockfd, int level, int optname,
 		void *optval, socklen_t *optlen)
 {
-	//std::cout << "Using sctp getsockotpt" << std::endl;
+	std::cout << "Using sctp getsockotpt" << std::endl;
 	return getsockopt(sockfd, level, optname, optval, optlen);
 }
 
 int sctp_transport::tx_setsockopt(int sockfd, int level, int optname,
 		const void *optval, socklen_t optlen)
 {
-	//std::cout << "Using sctp setsockopt" << std::endl;
+	std::cout << "Using sctp setsockopt" << std::endl;
 	return setsockopt(sockfd, level, optname, optval, optlen);
 }
 
 void sctp_transport::tx_set_receive_buffer(int sockfd, int bufsize)
 {
-	//std::cout << "Using sctp set_receive_buffer" << std::endl;
+	std::cout << "Using sctp set_receive_buffer" << std::endl;
 	set_tcp_receive_buffer(sockfd, bufsize);
 }
 
 void sctp_transport::tx_set_send_buffer(int sockfd, int bufsize)
 {
-	//std::cout << "Using sctp set_send_buffer" << std::endl;
+	std::cout << "Using sctp set_send_buffer" << std::endl;
 	set_tcp_send_buffer(sockfd, bufsize);
 }
 
@@ -262,7 +262,7 @@ void sctp_transport::tx_set_keepalives(int sockfd, int keepalive, int keepalive_
 
 void sctp_transport::tx_tune_socket(int sockfd)
 {
-	//std::cout << "Using sctp tune_socket" << std::endl;
+	std::cout << "Using sctp tune_socket" << std::endl;
 	int nodelay = 1;
 	int rc = setsockopt(sockfd, IPPROTO_SCTP, SCTP_NODELAY, (char*) &nodelay,
 			sizeof(int));
@@ -272,25 +272,25 @@ void sctp_transport::tx_tune_socket(int sockfd)
 
 void sctp_transport::tx_unblock_socket(int sockfd)
 {
-	//std::cout << "Using sctp ublock socket" << std::endl;
+	std::cout << "Using sctp ublock socket" << std::endl;
 	unblock_socket(sockfd);
 }
 
 void sctp_transport::tx_enable_ipv4_mapping(int sockfd)
 {
-	//std::cout << "Using sctp enable_ipv4_mapping" << std::endl;
+	std::cout << "Using sctp enable_ipv4_mapping" << std::endl;
 	enable_ipv4_mapping(sockfd);
 }
 
 void sctp_transport::tx_get_peer_ip_address(int sockfd, std::string &ip_addr)
 {
-	//std::cout << "Using get_peer_ip_address" << std::endl;
+	std::cout << "Using get_peer_ip_address" << std::endl;
 	get_peer_ip_address(sockfd, ip_addr);
 }
 
 void sctp_transport::tx_set_ip_type_of_service(int sockfd, int iptos)
 {
-	//std::cout << "Using set_ip_type_of_service" << std::endl;
+	std::cout << "Using set_ip_type_of_service" << std::endl;
 	set_ip_type_of_service(sockfd, iptos);
 }
 
