@@ -1,8 +1,12 @@
 /*
- * transport.h
+ * transport.hpp
  *
  *  Created on: 19/03/2014
- *      Author: michael
+ *      Author: Michael Holmwood
+ *
+ *      The purpose of this interface is to provide general access to
+ *      the network functionality of a protocol, maintaining the same
+ *      API as Berkley Sockets.
  */
 
 #ifndef TRANSPORT_HPP_
