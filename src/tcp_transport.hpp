@@ -1,27 +1,27 @@
 /*
- * tcpWrapper.h
+ * tcp_transport.hpp
  *
  *  Created on: 19/03/2014
- *      Author: michael
+ *      Author: Michael Holmwood
  */
 
-#ifndef TCPWRAPPER_H_
-#define TCPWRAPPER_H_
+#ifndef TCP_TRANSPORT_HPP_
+#define TCP_TRANSPORT_HPP_
 
-#include "transport.h"
+#include "transport.hpp"
 
 #include <string>
 #include <sys/socket.h>
 
 namespace zmq {
 
-class Tcp_Wrapper : public Transport
+class tcp_transport : public transport
 {
 
 public:
-	Tcp_Wrapper();
+	tcp_transport();
 
-	virtual ~Tcp_Wrapper();
+	virtual ~tcp_transport();
 
 	int tx_socket(int domain, int type, int protocol);
 
@@ -71,4 +71,4 @@ public:
 
 } /* namespace zmq */
 
-#endif /* TCPWRAPPER_H_ */
+#endif /* TCP_TRANSPORT_HPP_ */

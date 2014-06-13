@@ -26,7 +26,7 @@
 #include "io_object.hpp"
 #include "../include/zmq.h"
 
-#include "transport.h"
+#include "transport.hpp"
 
 namespace zmq
 {
@@ -44,7 +44,7 @@ namespace zmq
         tcp_connecter_t (zmq::io_thread_t *io_thread_,
             zmq::session_base_t *session_, const options_t &options_,
             address_t *addr_, bool delayed_start_,
-            Transport *transport);
+            transport *transport);
         ~tcp_connecter_t ();
 
     private:
@@ -116,7 +116,7 @@ namespace zmq
         zmq::socket_base_t *socket;
 
         // Transport object (pluggable txprt).
-        Transport *transport;
+        transport *tx_transport;
 
         tcp_connecter_t (const tcp_connecter_t&);
         const tcp_connecter_t &operator = (const tcp_connecter_t&);

@@ -72,8 +72,8 @@
 #include "xsub.hpp"
 #include "stream.hpp"
 
-#include "transport.h"
-#include "tcpWrapper.h"
+#include "transport.hpp"
+#include "tcp_transport.hpp"
 #include "sctp_transport.hpp"
 
 bool zmq::socket_base_t::check_tag ()
@@ -390,14 +390,14 @@ int zmq::socket_base_t::bind (const char *addr_)
 
     if (protocol == "tcp" || protocol == "sctp") {
 
-    	zmq::Transport *txpt;
+    	zmq::transport *txpt;
 
     	if(protocol == "tcp"){
-    		txpt = new (std::nothrow) Tcp_Wrapper();
+    		txpt = new (std::nothrow) tcp_transport();
 
     	}
     	else{
-    		txpt = new (std::nothrow) sctp_wrapper();
+    		txpt = new (std::nothrow) sctp_transport();
     	}
 
     	//options.t_options = txpt->tx_get_options();

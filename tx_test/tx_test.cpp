@@ -20,7 +20,7 @@ using namespace zmq;
 struct End_Point
 {
 	int sock_d;
-	Transport *wrapper;
+	transport *wrapper;
 	struct addrinfo *addr;
 	pthread_t thread;
 	int initalized;
@@ -53,7 +53,7 @@ int main(void)
 	error_check(rc, "resolve_address: client");
 
 	prt_info("Creating wrapper object");
-	Transport *wrapper = (Transport*)new Tcp_Wrapper();
+	transport *wrapper = (transport*)new tcp_transport();
 
 	ep_client->wrapper = wrapper;
 	ep_server->wrapper = wrapper;
@@ -109,7 +109,7 @@ void *client(void *point)
 	prt_info("Client Started");
 	End_Point *ep_client = static_cast<End_Point*>(point);
 
-	Transport *wrapper = ep_client->wrapper;
+	transport *wrapper = ep_client->wrapper;
 
 	rc = wrapper->tx_connect(ep_client->sock_d, ep_client->addr->ai_addr,
 			ep_client->addr->ai_addrlen);
@@ -134,7 +134,7 @@ void *server(void *point)
 	prt_info("Server Started");
 	End_Point *ep_server = static_cast<End_Point*>(point);
 
-	Transport *wrapper = ep_server->wrapper;
+	transport *wrapper = ep_server->wrapper;
 
 	rc = wrapper->tx_bind(ep_server->sock_d, ep_server->addr->ai_addr,
 			ep_server->addr->ai_addrlen);

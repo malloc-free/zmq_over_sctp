@@ -151,37 +151,37 @@ int sctp_options_t::tx_set_rto(int rto)
 
 ////////////////// sctp_wrapper member functions ////////////////////////
 
-sctp_wrapper::sctp_wrapper() :
+sctp_transport::sctp_transport() :
 	options()
 {
 	options = new sctp_options_t;
 }
 
-sctp_wrapper::~sctp_wrapper()
+sctp_transport::~sctp_transport()
 {
 	delete(options);
 }
 
-int sctp_wrapper::tx_socket(int domain, int type, int protocol)
+int sctp_transport::tx_socket(int domain, int type, int protocol)
 {
 	//std::cout << "Using sctp socket" << std::endl;
 	return socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 }
 
-int sctp_wrapper::tx_connect(int sockfd, const struct sockaddr *addr,
+int sctp_transport::tx_connect(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
 	//std::cout << "Using sctp connect" << std::endl;
 	return connect(sockfd, addr, addrlen);
 }
 
-int sctp_wrapper::tx_listen(int sockfd, int backlog)
+int sctp_transport::tx_listen(int sockfd, int backlog)
 {
 	//std::cout << "Using sctp listen" << std::endl;
 	return listen(sockfd, backlog);
 }
 
-int sctp_wrapper::tx_bind(int sockfd, const struct sockaddr *addr,
+int sctp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
 	//std::cout << "Using sctp bind" << std::endl;
@@ -194,58 +194,58 @@ int sctp_wrapper::tx_bind(int sockfd, const struct sockaddr *addr,
 	return rc;
 }
 
-int sctp_wrapper::tx_accept(int sockfd, struct sockaddr *addr,
+int sctp_transport::tx_accept(int sockfd, struct sockaddr *addr,
 		socklen_t *addrlen)
 {
 	//std::cout << "Using sctp accept" << std::endl;
 	return accept(sockfd, addr, addrlen);
 }
 
-int sctp_wrapper::tx_send(int sockfd, const void *buf, size_t len, int flags)
+int sctp_transport::tx_send(int sockfd, const void *buf, size_t len, int flags)
 {
 	//std::cout << "Using sctp send" << std::endl;
 	return send(sockfd, buf, len, flags);
 }
 
-int sctp_wrapper::tx_recv(int sockfd, void *buf, size_t len, int flags)
+int sctp_transport::tx_recv(int sockfd, void *buf, size_t len, int flags)
 {
 	//std::cout << "Using sctp recv" << std::endl;
 	return recv(sockfd, buf, len, flags);
 }
 
-int sctp_wrapper::tx_close(int fd)
+int sctp_transport::tx_close(int fd)
 {
 	//std::cout << "Using sctp close" << std::endl;
 	return close(fd);
 }
 
-int sctp_wrapper::tx_getsockopt(int sockfd, int level, int optname,
+int sctp_transport::tx_getsockopt(int sockfd, int level, int optname,
 		void *optval, socklen_t *optlen)
 {
 	//std::cout << "Using sctp getsockotpt" << std::endl;
 	return getsockopt(sockfd, level, optname, optval, optlen);
 }
 
-int sctp_wrapper::tx_setsockopt(int sockfd, int level, int optname,
+int sctp_transport::tx_setsockopt(int sockfd, int level, int optname,
 		const void *optval, socklen_t optlen)
 {
 	//std::cout << "Using sctp setsockopt" << std::endl;
 	return setsockopt(sockfd, level, optname, optval, optlen);
 }
 
-void sctp_wrapper::tx_set_receive_buffer(int sockfd, int bufsize)
+void sctp_transport::tx_set_receive_buffer(int sockfd, int bufsize)
 {
 	//std::cout << "Using sctp set_receive_buffer" << std::endl;
 	set_tcp_receive_buffer(sockfd, bufsize);
 }
 
-void sctp_wrapper::tx_set_send_buffer(int sockfd, int bufsize)
+void sctp_transport::tx_set_send_buffer(int sockfd, int bufsize)
 {
 	//std::cout << "Using sctp set_send_buffer" << std::endl;
 	set_tcp_send_buffer(sockfd, bufsize);
 }
 
-void sctp_wrapper::tx_set_keepalives(int sockfd, int keepalive, int keepalive_cnt,
+void sctp_transport::tx_set_keepalives(int sockfd, int keepalive, int keepalive_cnt,
 		int keepalive_idle, int keepalive_intv)
 {
 
@@ -260,7 +260,7 @@ void sctp_wrapper::tx_set_keepalives(int sockfd, int keepalive, int keepalive_cn
 
 }
 
-void sctp_wrapper::tx_tune_socket(int sockfd)
+void sctp_transport::tx_tune_socket(int sockfd)
 {
 	//std::cout << "Using sctp tune_socket" << std::endl;
 	int nodelay = 1;
@@ -270,36 +270,36 @@ void sctp_wrapper::tx_tune_socket(int sockfd)
 	errno_assert(rc == 0);
 }
 
-void sctp_wrapper::tx_unblock_socket(int sockfd)
+void sctp_transport::tx_unblock_socket(int sockfd)
 {
 	//std::cout << "Using sctp ublock socket" << std::endl;
 	unblock_socket(sockfd);
 }
 
-void sctp_wrapper::tx_enable_ipv4_mapping(int sockfd)
+void sctp_transport::tx_enable_ipv4_mapping(int sockfd)
 {
 	//std::cout << "Using sctp enable_ipv4_mapping" << std::endl;
 	enable_ipv4_mapping(sockfd);
 }
 
-void sctp_wrapper::tx_get_peer_ip_address(int sockfd, std::string &ip_addr)
+void sctp_transport::tx_get_peer_ip_address(int sockfd, std::string &ip_addr)
 {
 	//std::cout << "Using get_peer_ip_address" << std::endl;
 	get_peer_ip_address(sockfd, ip_addr);
 }
 
-void sctp_wrapper::tx_set_ip_type_of_service(int sockfd, int iptos)
+void sctp_transport::tx_set_ip_type_of_service(int sockfd, int iptos)
 {
 	//std::cout << "Using set_ip_type_of_service" << std::endl;
 	set_ip_type_of_service(sockfd, iptos);
 }
 
-transport_options_t *sctp_wrapper::tx_get_options()
+transport_options_t *sctp_transport::tx_get_options()
 {
 	return options;
 }
 
-int sctp_wrapper::tx_set_heartbeat_intvl(int sockfd, int value)
+int sctp_transport::tx_set_heartbeat_intvl(int sockfd, int value)
 {
 
 //	if(getsockopt(sockfd, SOL_SOCKET, SCTP_PEER_ADDR_PARAMS, &hb, &l) == -1) {
@@ -337,7 +337,7 @@ int sctp_wrapper::tx_set_heartbeat_intvl(int sockfd, int value)
 	return 0;
 }
 
-int sctp_wrapper::tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addresses)
+int sctp_transport::tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addresses)
 {
 	std::cout << "setting addresses" << std::endl;
 	std::vector<tcp_address_t*>::iterator it = addresses->begin();
@@ -361,7 +361,7 @@ int sctp_wrapper::tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addr
 	return 0;
 }
 
-int sctp_wrapper::tx_set_rto(int sockfd, int value)
+int sctp_transport::tx_set_rto(int sockfd, int value)
 {
 	std::cout << "Setting rto: " << value << std::endl;
 	struct sctp_rtoinfo rtoinfo;
@@ -379,7 +379,7 @@ int sctp_wrapper::tx_set_rto(int sockfd, int value)
 	return 0;
 }
 
-int sctp_wrapper::tx_set_num_streams(int sockfd, int in, int out)
+int sctp_transport::tx_set_num_streams(int sockfd, int in, int out)
 {
 	struct sctp_initmsg init;
 	memset(&init, 0, sizeof(init));
@@ -398,7 +398,7 @@ int sctp_wrapper::tx_set_num_streams(int sockfd, int in, int out)
 	return 0;
 }
 
-void sctp_wrapper::tx_set_options(int sockfd, transport_options_t *options_)
+void sctp_transport::tx_set_options(int sockfd, transport_options_t *options_)
 {
 
 	sctp_options_t *sctp_opt = (sctp_options_t*)options_;

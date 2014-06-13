@@ -35,8 +35,6 @@
 #include "pipe.hpp"
 #include "err.hpp"
 #include "msg.hpp"
-#include "transport.h"
-#include "tcpWrapper.h"
 
 #define ZMQ_CTX_TAG_VALUE_GOOD 0xabadcafe
 #define ZMQ_CTX_TAG_VALUE_BAD  0xdeadbeef
@@ -60,7 +58,7 @@ zmq::ctx_t::ctx_t () :
     io_thread_count (ZMQ_IO_THREADS_DFLT),
     ipv6 (false)
 {
-	transport = new Tcp_Wrapper();
+
 #ifdef HAVE_FORK
     pid = getpid();
 #endif
@@ -95,9 +93,6 @@ zmq::ctx_t::~ctx_t ()
 
     //  Remove the tag, so that the object is considered dead.
     tag = ZMQ_CTX_TAG_VALUE_BAD;
-
-    // Delete transport mechanism (pluggable txprt).
-    delete transport;
 }
 
 int zmq::ctx_t::terminate ()
@@ -224,11 +219,6 @@ int zmq::ctx_t::get (int option_)
         rc = -1;
     }
     return rc;
-}
-
-zmq::Transport *zmq::ctx_t::get_transport()
-{
-	return transport;
 }
 
 zmq::socket_base_t *zmq::ctx_t::create_socket (int type_)

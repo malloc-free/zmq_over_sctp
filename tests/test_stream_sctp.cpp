@@ -18,7 +18,6 @@
 */
 
 #include "testutil.hpp"
-#include "../src/transport.h"
 
 //  ZMTP protocol greeting structure
 

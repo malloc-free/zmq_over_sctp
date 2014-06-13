@@ -5,8 +5,8 @@
  *      Author: michael
  */
 
-#ifndef TRANSPORT_H_
-#define TRANSPORT_H_
+#ifndef TRANSPORT_HPP_
+#define TRANSPORT_HPP_
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -31,13 +31,13 @@ public:
 };
 
 /**
- * Interface for trasport protocols.
+ * Interface for transport protocols.
  */
-class Transport
+class transport
 {
 public:
 
-	virtual ~Transport() {};
+	virtual ~transport() {};
 
 	virtual int tx_socket(int domain, int type, int protocol) = 0;
 
@@ -87,4 +87,4 @@ public:
 
 } /* namespace zmq */
 
-#endif /* TRANSPORT_H_ */
+#endif /* TRANSPORT_HPP_ */

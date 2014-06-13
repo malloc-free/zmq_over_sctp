@@ -53,11 +53,11 @@
 #include "likely.hpp"
 #include "wire.hpp"
 
-#include "transport.h"
+#include "transport.hpp"
 
 zmq::stream_engine_t::stream_engine_t (fd_t fd_, const options_t &options_, 
                                        const std::string &endpoint_,
-                                       Transport *transport_) :
+                                       transport *transport_) :
     s (fd_),
     inpos (NULL),
     insize (0),
@@ -80,7 +80,7 @@ zmq::stream_engine_t::stream_engine_t (fd_t fd_, const options_t &options_,
     input_stopped (false),
     output_stopped (false),
     socket (NULL),
-    transport (transport_)
+    tx_transport (transport_)
 {
     int rc = tx_msg.init ();
     errno_assert (rc == 0);
@@ -838,8 +838,8 @@ int zmq::stream_engine_t::write (const void *data_, size_t size_)
     ssize_t nbytes;
     //ssize_t nbytes = send (s, data_, size_, 0);
     //Send bytes (pluggable txprt).
-    if(transport != NULL)
-    	nbytes = transport->tx_send (s, (char*) data_,
+    if(tx_transport != NULL)
+    	nbytes = tx_transport->tx_send (s, (char*) data_,
     			(int) size_, 0);
     else
     	nbytes = send(s, (char*) data_, (int) size_, 0);
@@ -899,8 +899,8 @@ int zmq::stream_engine_t::read (void *data_, size_t size_)
 #else
     ssize_t rc;
     //const ssize_t rc = recv (s, data_, size_, 0);
-    if(transport != NULL)
-    	rc = transport->tx_recv(s, data_, size_, 0);
+    if(tx_transport != NULL)
+    	rc = tx_transport->tx_recv(s, data_, size_, 0);
     else
     	rc = recv(s, data_, size_, 0);
 

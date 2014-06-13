@@ -33,7 +33,7 @@
 #include "tcp.hpp"
 #include "socket_base.hpp"
 
-#include "transport.h"
+#include "transport.hpp"
 
 #ifdef ZMQ_HAVE_WINDOWS
 #include "windows.hpp"
@@ -53,12 +53,12 @@
 
 zmq::tcp_listener_t::tcp_listener_t (io_thread_t *io_thread_,
       socket_base_t *socket_, const options_t &options_,
-      Transport *transport_) :
+      transport *transport_) :
     own_t (io_thread_, options_),
     io_object_t (io_thread_),
     s (retired_fd),
     socket (socket_),
-    transport(transport_)
+    tx_transport(transport_)
 {
 }
 
@@ -95,8 +95,8 @@ void zmq::tcp_listener_t::in_event ()
     //tune_tcp_socket (fd);
     //tune_tcp_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
 
-    transport->tx_tune_socket(fd);
-    transport->tx_set_keepalives(fd, options.tcp_keepalive,
+    tx_transport->tx_tune_socket(fd);
+    tx_transport->tx_set_keepalives(fd, options.tcp_keepalive,
     		options.tcp_keepalive_cnt,
     		options.tcp_keepalive_idle,
     		options.tcp_keepalive_intvl);
@@ -106,7 +106,7 @@ void zmq::tcp_listener_t::in_event ()
 
     //  Create the engine object for this connection.
     stream_engine_t *engine = new (std::nothrow)
-        stream_engine_t (fd, options, endpoint, transport);
+        stream_engine_t (fd, options, endpoint, tx_transport);
     alloc_assert (engine);
 
     //  Choose I/O thread to run connecter in. Given that we are already
@@ -133,7 +133,7 @@ void zmq::tcp_listener_t::close ()
 #else
     //int rc = ::close (s);
     // Close socket (pluggable txprt).
-    int rc = transport->tx_close(s);
+    int rc = tx_transport->tx_close(s);
     errno_assert (rc == 0);
 #endif
     socket->event_closed (endpoint, s);
@@ -168,7 +168,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         return -1;
 
     //  Create a listening socket.
-    s = transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
+    s = tx_transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
 #ifdef ZMQ_HAVE_WINDOWS
     if (s == INVALID_SOCKET)
         errno = wsa_error_to_errno (WSAGetLastError ());
@@ -182,7 +182,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         if (rc != 0)
             return rc;
 
-        s = transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
+        s = tx_transport->tx_socket (address.family (), SOCK_STREAM, IPPROTO_TCP);
     }
 
 #ifdef ZMQ_HAVE_WINDOWS
@@ -203,14 +203,14 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
     //  On some systems, IPv4 mapping in IPv6 sockets is disabled by default.
     //  Switch it on in such cases.
     if (address.family () == AF_INET6)
-        transport->tx_enable_ipv4_mapping (s);
+        tx_transport->tx_enable_ipv4_mapping (s);
 
     // Set the IP Type-Of-Service for the underlying socket
     if (options.tos != 0)
-        transport->tx_set_ip_type_of_service (s, options.tos);
+        tx_transport->tx_set_ip_type_of_service (s, options.tos);
 
     if(options.t_options != NULL) {
-    	transport->tx_set_options(s, options.t_options);
+    	tx_transport->tx_set_options(s, options.t_options);
     }
 
     //  Set the socket buffer limits for the underlying socket.
@@ -222,9 +222,9 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
 
 #else
     if(options.sndbuf != 0)
-    	transport->tx_set_send_buffer(s, options.sndbuf);
+    	tx_transport->tx_set_send_buffer(s, options.sndbuf);
     if(options.rcvbuf != 0)
-    	transport->tx_set_receive_buffer(s, options.rcvbuf);
+    	tx_transport->tx_set_receive_buffer(s, options.rcvbuf);
 #endif
 
     //  Allow reusing of the address.
@@ -234,7 +234,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
         (const char*) &flag, sizeof (int));
     wsa_assert (rc != SOCKET_ERROR);
 #else
-    rc = transport->tx_setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (int));
+    rc = tx_transport->tx_setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (int));
     errno_assert (rc == 0);
 #endif
 
@@ -244,7 +244,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
     // rc = bind (s, address.addr (), address.addrlen ());
 
     // Bind using transport (pluggable txprt).
-    rc = transport->tx_bind(s, address.addr(), address.addrlen());
+    rc = tx_transport->tx_bind(s, address.addr(), address.addrlen());
 
     #ifdef ZMQ_HAVE_WINDOWS
     if (rc == SOCKET_ERROR) {
@@ -258,7 +258,7 @@ int zmq::tcp_listener_t::set_address (const char *addr_)
 
     //  Listen for incomming connections.
     // rc = listen (s, options.backlog);
-    rc = transport->tx_listen(s, options.backlog);
+    rc = tx_transport->tx_listen(s, options.backlog);
 
 #ifdef ZMQ_HAVE_WINDOWS
     if (rc == SOCKET_ERROR) {
@@ -295,7 +295,7 @@ zmq::fd_t zmq::tcp_listener_t::accept ()
     socklen_t ss_len = sizeof (ss);
 #endif
     //fd_t sock = ::accept (s, (struct sockaddr *) &ss, &ss_len);
-    fd_t sock = transport->tx_accept(s, (struct sockaddr *) &ss, &ss_len);
+    fd_t sock = tx_transport->tx_accept(s, (struct sockaddr *) &ss, &ss_len);
 
 #ifdef ZMQ_HAVE_WINDOWS
     if (sock == INVALID_SOCKET) {
@@ -335,7 +335,7 @@ zmq::fd_t zmq::tcp_listener_t::accept ()
 #else
             //int rc = ::close (sock);
             //Pluggable Transport
-            int rc = transport->tx_close(sock);
+            int rc = tx_transport->tx_close(sock);
             errno_assert (rc == 0);
 #endif
             return retired_fd;

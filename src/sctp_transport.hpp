@@ -8,7 +8,7 @@
 #ifndef SCTP_TRANSPORT_HPP_
 #define SCTP_TRANSPORT_HPP_
 
-#include "transport.h"
+#include "transport.hpp"
 #include "tcp_address.hpp"
 #include "../include/zmq.h"
 
@@ -25,7 +25,7 @@ namespace zmq {
 
 class sctp_options_t : public zmq::transport_options_t
 {
-	friend class sctp_wrapper;
+	friend class sctp_transport;
 
 public:
 	sctp_options_t();
@@ -49,12 +49,12 @@ private:
 	std::vector<tcp_address_t*> addresses;
 };
 
-class sctp_wrapper : public zmq::Transport
+class sctp_transport : public zmq::transport
 {
 
 public:
-	sctp_wrapper();
-	virtual ~sctp_wrapper();
+	sctp_transport();
+	virtual ~sctp_transport();
 
 	int tx_socket(int domain, int type, int protocol);
 

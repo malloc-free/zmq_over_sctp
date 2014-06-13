@@ -33,8 +33,8 @@
 #include "ctx.hpp"
 #include "req.hpp"
 
-#include "transport.h"
-#include "tcpWrapper.h"
+#include "transport.hpp"
+#include "tcp_transport.hpp"
 #include "sctp_transport.hpp"
 
 zmq::session_base_t *zmq::session_base_t::create (class io_thread_t *io_thread_,
@@ -488,13 +488,13 @@ void zmq::session_base_t::start_connecting (bool wait_)
 
     if (addr->protocol == "tcp" || addr->protocol == "sctp") {
 
-    	Transport *txpt;
+    	transport *txpt;
 
     	if(addr->protocol == "tcp"){
-    		txpt = new (std::nothrow) Tcp_Wrapper();
+    		txpt = new (std::nothrow) tcp_transport();
     	}
     	else{
-    		txpt = new (std::nothrow) sctp_wrapper();
+    		txpt = new (std::nothrow) sctp_transport();
     	}
 
     	//options.t_options = txpt->tx_get_options();

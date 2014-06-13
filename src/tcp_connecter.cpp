@@ -32,7 +32,7 @@
 #include "tcp_address.hpp"
 #include "session_base.hpp"
 
-#include "transport.h"
+#include "transport.hpp"
 
 #if defined ZMQ_HAVE_WINDOWS
 #include "windows.hpp"
@@ -52,7 +52,7 @@
 
 zmq::tcp_connecter_t::tcp_connecter_t (class io_thread_t *io_thread_,
       class session_base_t *session_, const options_t &options_,
-      address_t *addr_, bool delayed_start_, Transport *transport_) :
+      address_t *addr_, bool delayed_start_, transport *transport_) :
     own_t (io_thread_, options_),
     io_object_t (io_thread_),
     addr (addr_),
@@ -62,7 +62,7 @@ zmq::tcp_connecter_t::tcp_connecter_t (class io_thread_t *io_thread_,
     timer_started (false),
     session (session_),
     current_reconnect_ivl(options.reconnect_ivl),
-    transport(transport_)
+    tx_transport(transport_)
 {
     zmq_assert (addr);
     zmq_assert (addr->protocol == "tcp" || addr->protocol == "sctp");
@@ -124,15 +124,15 @@ void zmq::tcp_connecter_t::out_event ()
         return;
     }
 
-    transport->tx_tune_socket (fd);
-    transport->tx_set_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
+    tx_transport->tx_tune_socket (fd);
+    tx_transport->tx_set_keepalives (fd, options.tcp_keepalive, options.tcp_keepalive_cnt, options.tcp_keepalive_idle, options.tcp_keepalive_intvl);
 
     // remember our fd for ZMQ_SRCFD in messages
     socket->set_fd(fd);
 
     //  Create the engine object for this connection.
     stream_engine_t *engine = new (std::nothrow)
-        stream_engine_t (fd, options, endpoint, transport);
+        stream_engine_t (fd, options, endpoint, tx_transport);
     alloc_assert (engine);
 
     //  Attach the engine to the corresponding session object.
@@ -232,7 +232,7 @@ int zmq::tcp_connecter_t::open ()
 
     //  Create the socket.
     //s = open_socket (addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
-    s = transport->tx_socket(addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
+    s = tx_transport->tx_socket(addr->resolved.tcp_addr->family (), SOCK_STREAM, IPPROTO_TCP);
     #ifdef ZMQ_HAVE_WINDOWS
     if (s == INVALID_SOCKET) {
         errno = wsa_error_to_errno (WSAGetLastError ());
@@ -246,27 +246,27 @@ int zmq::tcp_connecter_t::open ()
     //  On some systems, IPv4 mapping in IPv6 sockets is disabled by default.
     //  Switch it on in such cases.
     if (addr->resolved.tcp_addr->family () == AF_INET6)
-        transport->tx_enable_ipv4_mapping (s);
+        tx_transport->tx_enable_ipv4_mapping (s);
 
     // Set the IP Type-Of-Service priority for this socket
     if (options.tos != 0)
-        transport->tx_set_ip_type_of_service (s, options.tos);
+        tx_transport->tx_set_ip_type_of_service (s, options.tos);
 
     // Set the socket to non-blocking mode so that we get async connect().
-    transport->tx_unblock_socket (s);
+    tx_transport->tx_unblock_socket (s);
 
     //  Set the socket buffer limits for the underlying socket.
     if (options.sndbuf != 0)
-        transport->tx_set_send_buffer (s, options.sndbuf);
+        tx_transport->tx_set_send_buffer (s, options.sndbuf);
     if (options.rcvbuf != 0)
-        transport->tx_set_receive_buffer (s, options.rcvbuf);
+        tx_transport->tx_set_receive_buffer (s, options.rcvbuf);
 
     // Set the IP Type-Of-Service for the underlying socket
     if (options.tos != 0)
-        transport->tx_set_ip_type_of_service (s, options.tos);
+        tx_transport->tx_set_ip_type_of_service (s, options.tos);
 
     if(options.t_options != NULL) {
-    	transport->tx_set_options(s, options.t_options);
+    	tx_transport->tx_set_options(s, options.t_options);
     }
 
     //  Connect to the remote peer.
@@ -275,7 +275,7 @@ int zmq::tcp_connecter_t::open ()
 //        addr->resolved.tcp_addr->addrlen ());
 
     //Connect using transport (pluggable txprt).
-    rc = transport->tx_connect (
+    rc = tx_transport->tx_connect (
             s, addr->resolved.tcp_addr->addr (),
             addr->resolved.tcp_addr->addrlen ());
 
@@ -309,7 +309,7 @@ zmq::fd_t zmq::tcp_connecter_t::connect ()
 #endif
 
     //int rc = getsockopt (s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
-    int rc = transport->tx_getsockopt(s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
+    int rc = tx_transport->tx_getsockopt(s, SOL_SOCKET, SO_ERROR, (char*) &err, &len);
 
     //  Assert if the error was caused by 0MQ bug.
     //  Networking problems are OK. No need to assert.
@@ -362,7 +362,7 @@ void zmq::tcp_connecter_t::close ()
 #else
     //int rc = ::close (s);
     // Close socket (pluggable txprt)
-    int rc = transport->tx_close(s);
+    int rc = tx_transport->tx_close(s);
     errno_assert (rc == 0);
 #endif
     socket->event_closed (endpoint, s);

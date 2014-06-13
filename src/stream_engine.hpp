@@ -31,7 +31,7 @@
 #include "socket_base.hpp"
 #include "../include/zmq.h"
 
-#include "transport.h"
+#include "transport.hpp"
 
 namespace zmq
 {
@@ -56,7 +56,7 @@ namespace zmq
 
         stream_engine_t (fd_t fd_, const options_t &options_, 
                          const std::string &endpoint,
-                         Transport *transport_);
+                         transport *transport_);
 
         ~stream_engine_t ();
 
@@ -193,7 +193,7 @@ namespace zmq
         std::string peer_address;
 
         //Transport object (pluggable txprt)
-        Transport *transport;
+        transport *tx_transport;
 
         stream_engine_t (const stream_engine_t&);
         const stream_engine_t &operator = (const stream_engine_t&);

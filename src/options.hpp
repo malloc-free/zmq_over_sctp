@@ -29,7 +29,7 @@
 #include "tcp_address.hpp"
 #include "../include/zmq.h"
 
-#include "transport.h"
+#include "transport.hpp"
 
 #if defined ZMQ_HAVE_SO_PEERCRED || defined ZMQ_HAVE_LOCAL_PEERCRED
 #include <sys/types.h>

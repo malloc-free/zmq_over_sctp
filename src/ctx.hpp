@@ -32,8 +32,6 @@
 #include "stdint.hpp"
 #include "options.hpp"
 #include "atomic_counter.hpp"
-#include "transport.h"
-#include "tcpWrapper.h"
 
 namespace zmq
 {
@@ -90,10 +88,6 @@ namespace zmq
         //  Set and get context properties.
         int set (int option_, int optval_);
         int get (int option_);
-
-
-        // Get transport info (pluggable txport).
-        Transport *get_transport();
 
         //  Create and destroy a socket.
         zmq::socket_base_t *create_socket (int type_);
@@ -192,9 +186,6 @@ namespace zmq
 
         //  Synchronisation of access to context options.
         mutex_t opt_sync;
-
-        //  Transport data (pluggable txprt).
-        Transport *transport;
 
         ctx_t (const ctx_t&);
         const ctx_t &operator = (const ctx_t&);
