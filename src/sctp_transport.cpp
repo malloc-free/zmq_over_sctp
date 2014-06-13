@@ -250,9 +250,10 @@ void sctp_transport::tx_set_keepalives(int sockfd, int keepalive, int keepalive_
 {
 
 #ifdef ZMQ_HAVE_SO_KEEPALIVE
-	std::cout << "Using sctp set_keepalives" << std::endl;
+
     if (keepalive != -1)
     {
+    	std::cout << "Using sctp set_keepalives" << std::endl;
         int rc = setsockopt (sockfd, SOL_SOCKET, SO_KEEPALIVE, (char*) &keepalive, sizeof (int));
         errno_assert (rc == 0);
     }

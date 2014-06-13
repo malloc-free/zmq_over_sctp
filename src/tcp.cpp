@@ -36,6 +36,7 @@
 #include <ioctl.h>
 #endif
 
+#include <iostream>
 void zmq::tune_tcp_socket (fd_t s_)
 {
     //  Disable Nagle's algorithm. We are doing data batching on 0MQ level,
@@ -107,11 +108,14 @@ void zmq::tune_tcp_keepalives (fd_t s_, int keepalive_, int keepalive_cnt_, int 
 #else
 #ifdef ZMQ_HAVE_SO_KEEPALIVE
     if (keepalive_ != -1) {
+    	std::cout << "setting keepalive" << std::endl;
         int rc = setsockopt (s_, SOL_SOCKET, SO_KEEPALIVE, (char*) &keepalive_, sizeof (int));
         errno_assert (rc == 0);
 
 #ifdef ZMQ_HAVE_TCP_KEEPCNT
+
         if (keepalive_cnt_ != -1) {
+        	std::cout << "setting tcp keepcnt" << std::endl;
             int rc = setsockopt (s_, IPPROTO_TCP, TCP_KEEPCNT, &keepalive_cnt_, sizeof (int));
             errno_assert (rc == 0);
         }
@@ -119,12 +123,14 @@ void zmq::tune_tcp_keepalives (fd_t s_, int keepalive_, int keepalive_cnt_, int 
 
 #ifdef ZMQ_HAVE_TCP_KEEPIDLE
         if (keepalive_idle_ != -1) {
+        	std::cout << "setting tcp keepidle" << std::endl;
             int rc = setsockopt (s_, IPPROTO_TCP, TCP_KEEPIDLE, &keepalive_idle_, sizeof (int));
             errno_assert (rc == 0);
         }
 #else // ZMQ_HAVE_TCP_KEEPIDLE
 #ifdef ZMQ_HAVE_TCP_KEEPALIVE
         if (keepalive_idle_ != -1) {
+        	std::cout << "setting tcp keepalive" << std::endl;
             int rc = setsockopt (s_, IPPROTO_TCP, TCP_KEEPALIVE, &keepalive_idle_, sizeof (int));
             errno_assert (rc == 0);
         }
