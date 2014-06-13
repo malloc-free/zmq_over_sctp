@@ -74,7 +74,7 @@
 
 #include "transport.h"
 #include "tcpWrapper.h"
-#include "sctpwrapper.h"
+#include "sctp_transport.hpp"
 
 bool zmq::socket_base_t::check_tag ()
 {

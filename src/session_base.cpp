@@ -35,7 +35,7 @@
 
 #include "transport.h"
 #include "tcpWrapper.h"
-#include "sctpwrapper.h"
+#include "sctp_transport.hpp"
 
 zmq::session_base_t *zmq::session_base_t::create (class io_thread_t *io_thread_,
     bool active_, class socket_base_t *socket_, const options_t &options_,

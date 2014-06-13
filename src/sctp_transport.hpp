@@ -1,12 +1,12 @@
 /*
- * sctpwrapper.h
+ * sctp_transport.h
  *
  *  Created on: 27/03/2014
  *      Author: michael
  */
 
-#ifndef SCTPWRAPPER_H_
-#define SCTPWRAPPER_H_
+#ifndef SCTP_TRANSPORT_HPP_
+#define SCTP_TRANSPORT_HPP_
 
 #include "transport.h"
 #include "tcp_address.hpp"
@@ -115,4 +115,4 @@ private:
 
 } /* namespace zmq */
 
-#endif /* SCTPWRAPPER_H_ */
+#endif /* SCTP_TRANSPORT_HPP_ */

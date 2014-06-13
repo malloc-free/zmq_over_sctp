@@ -1,11 +1,11 @@
 /*
- * sctpwrapper.cpp
+ * sctp_transport.cpp
  *
  *  Created on: 27/03/2014
- *      Author: michael
+ *      Author: Michael Holmwood
  */
 
-#include "sctpwrapper.h"
+#include "sctp_transport.hpp"
 #include "ip.hpp"
 #include "tcp.hpp"
 #include "err.hpp"
