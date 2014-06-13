@@ -137,7 +137,12 @@ zmq::stream_engine_t::~stream_engine_t ()
         int rc = closesocket (s);
         wsa_assert (rc != SOCKET_ERROR);
 #else
-        int rc = close (s);
+        int rc;
+        if(tx_transport != NULL)
+        	rc = tx_transport->tx_close (s);
+        else
+        	rc = close(s);
+
         errno_assert (rc == 0);
 #endif
         s = retired_fd;
