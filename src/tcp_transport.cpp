@@ -6,6 +6,7 @@
  */
 
 #include "tcp_transport.hpp"
+#include "transport.hpp"
 #include "err.hpp"
 #include "ip.hpp"
 #include "tcp.hpp"
@@ -32,53 +33,93 @@ tcp_transport::~tcp_transport() {
 
 int tcp_transport::tx_socket(int domain, int type, int protocol)
 {
+	int rc;
 	std::cout << "Using wrapper socket" << std::endl;
-	return socket(domain, type, protocol);
+	rc = socket(domain, type, protocol);
+
+	P_N_ERR(rc, "tx_socket");
+
+	return rc;
 }
 
 int tcp_transport::tx_connect(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
+	int rc;
 	std::cout << "Using wrapper connect" << std::endl;
-	return connect(sockfd, addr, addrlen);
+	rc = connect(sockfd, addr, addrlen);
+
+	P_Z_ERR(rc, "tx_connect");
+
+	return rc;
 }
 
 int tcp_transport::tx_listen(int sockfd, int backlog)
 {
+	int rc;
 	std::cout << "Using wrapper listen" << std::endl;
-	return listen(sockfd, backlog);
+	rc = listen(sockfd, backlog);
+
+	P_Z_ERR(rc, "tx_listen");
+
+	return rc;
 }
 
 int tcp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
+	int rc;
 	std::cout << "Using wrapper bind" << std::endl;
-	return bind(sockfd, addr, addrlen);
+	rc = bind(sockfd, addr, addrlen);
+
+	P_Z_ERR(rc, "tx_bind");
+
+	return rc;
 }
 
 int tcp_transport::tx_accept(int sockfd, struct sockaddr *addr,
 		socklen_t *addrlen)
 {
+	int rc;
 	std::cout << "Using wrapper accept" << std::endl;
-	return accept(sockfd, addr, addrlen);
+	rc = accept(sockfd, addr, addrlen);
+
+	P_N_ERR(rc, "tx_accept");
+
+	return rc;
 }
 
 int tcp_transport::tx_send(int sockfd, const void *buf, size_t len, int flags)
 {
+	int rc;
 	std::cout << "Using wrapper send" << std::endl;
-	return send(sockfd, buf, len, flags);
+	rc = send(sockfd, buf, len, flags);
+
+	P_N_ERR(rc, "tx_send");
+
+	return rc;
 }
 
 int tcp_transport::tx_recv(int sockfd, void *buf, size_t len, int flags)
 {
+	int rc;
 	std::cout << "Using wrapper recv" << std::endl;
-	return recv(sockfd, buf, len, flags);
+	rc = recv(sockfd, buf, len, flags);
+
+	P_N_ERR(rc, "tx_recv");
+
+	return rc;
 }
 
 int tcp_transport::tx_close(int fd)
 {
+	int rc;
 	std::cout << "Using wrapper close" << std::endl;
-	return close(fd);
+	rc = close(fd);
+
+	P_Z_ERR(rc, "tx_close");
+
+	return rc;
 }
 
 int tcp_transport::tx_getsockopt(int sockfd, int level, int optname,

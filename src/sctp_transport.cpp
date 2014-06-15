@@ -6,6 +6,7 @@
  */
 
 #include "sctp_transport.hpp"
+#include "transport.hpp"
 #include "ip.hpp"
 #include "tcp.hpp"
 #include "err.hpp"
@@ -164,21 +165,36 @@ sctp_transport::~sctp_transport()
 
 int sctp_transport::tx_socket(int domain, int type, int protocol)
 {
+	int rc;
 	std::cout << "Using sctp socket" << std::endl;
-	return socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+	rc =  socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+
+	P_N_ERR(rc, "tx_socket");
+
+	return rc;
 }
 
 int sctp_transport::tx_connect(int sockfd, const struct sockaddr *addr,
 		socklen_t addrlen)
 {
+	int rc;
 	std::cout << "Using sctp connect" << std::endl;
-	return connect(sockfd, addr, addrlen);
+	rc = connect(sockfd, addr, addrlen);
+
+	P_Z_ERR(rc, "tx_connect");
+
+	return rc;
 }
 
 int sctp_transport::tx_listen(int sockfd, int backlog)
 {
+	int rc;
 	std::cout << "Using sctp listen" << std::endl;
-	return listen(sockfd, backlog);
+	rc = listen(sockfd, backlog);
+
+	P_Z_ERR(rc, "tx_listen");
+
+	return rc;
 }
 
 int sctp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
@@ -191,46 +207,79 @@ int sctp_transport::tx_bind(int sockfd, const struct sockaddr *addr,
 		tx_set_addresses(sockfd, &options->addresses);
 	}
 
+	P_Z_ERR(rc, "tx_bind");
+
 	return rc;
 }
 
 int sctp_transport::tx_accept(int sockfd, struct sockaddr *addr,
 		socklen_t *addrlen)
 {
+	int rc;
 	std::cout << "Using sctp accept" << std::endl;
-	return accept(sockfd, addr, addrlen);
+	rc = accept(sockfd, addr, addrlen);
+
+	P_N_ERR(rc, "tx_accept");
+
+	return rc;
 }
 
 int sctp_transport::tx_send(int sockfd, const void *buf, size_t len, int flags)
 {
+	int rc;
 	std::cout << "Using sctp send" << std::endl;
-	return send(sockfd, buf, len, flags);
+	rc = send(sockfd, buf, len, flags);
+
+	P_N_ERR(rc, "tx_send");
+
+	return rc;
 }
 
 int sctp_transport::tx_recv(int sockfd, void *buf, size_t len, int flags)
 {
+	int rc;
 	std::cout << "Using sctp recv" << std::endl;
-	return recv(sockfd, buf, len, flags);
+	rc = recv(sockfd, buf, len, flags);
+
+	P_N_ERR(rc, "tx_recv");
+
+	return rc;
 }
 
 int sctp_transport::tx_close(int fd)
 {
+	int rc;
 	std::cout << "Using sctp close" << std::endl;
-	return close(fd);
+	rc = close(fd);
+
+	P_Z_ERR(rc, "tx_close");
+
+	return rc;
 }
 
 int sctp_transport::tx_getsockopt(int sockfd, int level, int optname,
 		void *optval, socklen_t *optlen)
 {
+	int rc;
 	std::cout << "Using sctp getsockotpt" << std::endl;
-	return getsockopt(sockfd, level, optname, optval, optlen);
+	rc = getsockopt(sockfd, level, optname, optval, optlen);
+
+	P_Z_ERR(rc, "tx_getsockopt");
+
+	return rc;
 }
 
 int sctp_transport::tx_setsockopt(int sockfd, int level, int optname,
 		const void *optval, socklen_t optlen)
 {
+	int rc;
 	std::cout << "Using sctp setsockopt" << std::endl;
-	return setsockopt(sockfd, level, optname, optval, optlen);
+
+	rc = setsockopt(sockfd, level, optname, optval, optlen);
+
+	P_Z_ERR(rc, "tx_setsockopt");
+
+	return rc;
 }
 
 void sctp_transport::tx_set_receive_buffer(int sockfd, int bufsize)

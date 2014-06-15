@@ -18,12 +18,13 @@
 #include <string>
 #include <../include/zmq.h>
 
+#define P_Z_ERR(i, s) if(i != 0)  perror(s)
+#define P_N_ERR(i, s) if(i == -1)  perror(s)
+
 namespace zmq
 {
 
 //Passed into setSockOpt to set the specified option
-
-
 class transport_options_t
 {
 public:
