@@ -57,6 +57,7 @@ struct t_option_t
 #define ZMQ_SCTP_RTO 		4
 #define ZMQ_SCTP_MAX_IN		5
 #define ZMQ_SCTP_MAX_OUT	6
+#define ZMQ_SCTP_PATH_RTX	7
 
 #if !defined _WIN32_WCE
 #include <errno.h>

@@ -46,6 +46,7 @@ private:
 	int rto_max;
 	int stream_num_out;
 	int stream_num_in;
+	int path_rtx;
 	std::vector<tcp_address_t*> addresses;
 };
 
@@ -104,7 +105,7 @@ public:
 private:
 	sctp_options_t *options;
 
-	int tx_set_heartbeat_intvl(int sockfd, int value);
+	int tx_set_heartbeat_intvl(int sockfd, int hb, int max_rtx);
 
 	int tx_set_addresses(int sockfd, std::vector<tcp_address_t*> *addresses);
 

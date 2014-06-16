@@ -28,7 +28,8 @@ sctp_options_t::sctp_options_t() :
 		heartbeat_intvl(-1),
 		rto_max(-1),
 		stream_num_out(DEFAULT_MAX_OUT),
-		stream_num_in(DEFAULT_MAX_IN)
+		stream_num_in(DEFAULT_MAX_IN),
+		path_rtx(-1)
 {
 }
 
@@ -76,6 +77,10 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 
 	case ZMQ_SCTP_MAX_OUT :
 		stream_num_out = *((int*)t_opt->optval_);
+		return 0;
+
+	case ZMQ_SCTP_PATH_RTX :
+		path_rtx = *((int*)t_opt->optval_);
 		return 0;
 
 	default : break;
@@ -349,7 +354,7 @@ transport_options_t *sctp_transport::tx_get_options()
 	return options;
 }
 
-int sctp_transport::tx_set_heartbeat_intvl(int sockfd, int value)
+int sctp_transport::tx_set_heartbeat_intvl(int sockfd, int hb, int max_rtx)
 {
 
 //	if(getsockopt(sockfd, SOL_SOCKET, SCTP_PEER_ADDR_PARAMS, &hb, &l) == -1) {
@@ -358,30 +363,34 @@ int sctp_transport::tx_set_heartbeat_intvl(int sockfd, int value)
 //	else {
 //		std::cout << "heartbeat def = " << hb.spp_hbinterval << std::endl;
 //	}
-	std::cout << "hb to set = " << value << std::endl;
+	std::cout << "hb to set = " << hb << std::endl;
 
 	struct sctp_paddrparams heartbeat;
 	memset(&heartbeat, 0 ,sizeof(struct sctp_paddrparams));
 
-	heartbeat.spp_hbinterval = value;
-	heartbeat.spp_flags = SPP_HB_ENABLE;
-	heartbeat.spp_pathmaxrxt = 1;
+	if(hb != -1) {
+		heartbeat.spp_hbinterval = hb;
+		heartbeat.spp_flags = SPP_HB_ENABLE;
+	}
+
+	if(max_rtx != -1)
+		heartbeat.spp_pathmaxrxt = max_rtx;
 
 	if(setsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &heartbeat,
 			sizeof(struct sctp_paddrparams)) == -1) {
 		perror("sctp_wrapper: tx_set_heartbeat_intvl");
 	}
 
-	struct sctp_paddrparams hb;
+	struct sctp_paddrparams params;
 	memset(&hb, 0, sizeof(struct sctp_paddrparams));
 	socklen_t l = sizeof(struct sctp_paddrparams);
 
 
-	if(getsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &hb, &l) == -1) {
+	if(getsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &params, &l) == -1) {
 		perror("sctp_wrapper: getsockopt");
 	}
 	else {
-		std::cout << "heartbeat new = " << hb.spp_hbinterval << std::endl;
+		std::cout << "heartbeat new = " << params.spp_hbinterval << std::endl;
 	}
 
 	return 0;
@@ -464,11 +473,11 @@ void sctp_transport::tx_set_options(int sockfd, transport_options_t *options_)
 
 	std::cout << "Setting options" << std::endl;
 	std::cout << "heartbeat = " << sctp_opt->heartbeat_intvl << std::endl;
-	if(sctp_opt->heartbeat_intvl != -1) {
-		tx_set_heartbeat_intvl(sockfd, sctp_opt->heartbeat_intvl);
-		std::cout << "heartbeat set to :" << sctp_opt->heartbeat_intvl
-				<< std::endl;
-	}
+
+	tx_set_heartbeat_intvl(sockfd, sctp_opt->heartbeat_intvl, sctp_opt->path_rtx);
+	std::cout << "heartbeat set to :" << sctp_opt->heartbeat_intvl
+			<< std::endl;
+
 
 	std::cout << "rto = " << sctp_opt->rto_max << std::endl;
 	if(sctp_opt->rto_max != -1) {
