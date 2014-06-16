@@ -51,7 +51,7 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 		value = *((int*)t_opt->optval_);
 
 		if(value > 0 && is_int) {
-			heartbeat_intvl = *((int*)t_opt->optval_);
+			heartbeat_intvl = value;
 			return 0;
 		}
 
@@ -65,7 +65,7 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 		value = *((int*)t_opt->optval_);
 
 		if(value > 0 && is_int) {
-			rto_max = *((int*)t_opt->optval_);
+			rto_max = value;
 			return 0;
 		}
 
@@ -80,8 +80,15 @@ int sctp_options_t::setsockopt(const void *optval_, size_t optvallen_)
 		return 0;
 
 	case ZMQ_SCTP_PATH_RTX :
-		path_rtx = *((int*)t_opt->optval_);
-		return 0;
+
+		value = *((int*)t_opt->optval_);
+
+		if(value > 0 && is_int) {
+			path_rtx = value;
+			return 0;
+		}
+
+		break;
 
 	default : break;
 
@@ -375,6 +382,7 @@ int sctp_transport::tx_set_heartbeat_intvl(int sockfd, int hb, int max_rtx)
 
 	if(max_rtx != -1)
 		heartbeat.spp_pathmaxrxt = max_rtx;
+
 
 	if(setsockopt(sockfd, SOL_SCTP, SCTP_PEER_ADDR_PARAMS, &heartbeat,
 			sizeof(struct sctp_paddrparams)) == -1) {
